@@ -27,8 +27,6 @@ x86/
 bld/
 [Oo]bj/
 [Ll]og/
-**/[Bb]in/[Dd]ebug/**
-!**/[Bb]in/[Dd]ebug/*.csv
 desktop.ini
 
 # Visual Studio 2015/2017 cache/options directory
