@@ -1,6 +1,8 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace CG_OpenCV
 {
@@ -1181,7 +1183,141 @@ namespace CG_OpenCV
             }
         }
 
+        /// <summary>
+        /// Connected components algorithm, it takes the 0,0 pixel as the
+        /// background color and finds and tags any images inside.
+        /// 
+        /// TODO: 
+        /// - Optimize further. It takes about ~180 ms in my PC, making it
+        /// quite slow.
+        /// - Sort the tagged images into an image array or something
+        /// </summary>
+        /// <param name="img"></param>
+        /// <param name="imgCopy"></param>
+        public static void DetectIndependentObjects(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        {
+            unsafe
+            {
+                MIplImage m = img.MIplImage;
+                MIplImage mUndo = imgCopy.MIplImage;
 
+                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
+                int width = imgCopy.Width;
+                int heigh = imgCopy.Height;
+                int nChan = mUndo.nChannels;
+                int widthStep = mUndo.widthStep;
+
+                // Stores the current tag as key and the equity tag - Not sure about the performance cost tho.
+                Dictionary<int, int> linked = new Dictionary<int, int>();
+
+                // Temporarily stores the neighbors of the current pixel - Not sure about the performance cost tho.
+                List<int> neighbors = new List<int>();
+
+                // Contains the labels for each pixel
+                int[,] labels = new int[width, heigh];
+
+                // The next label to be given
+                int nextLabel = 1;
+
+                for (int y = 0; y < heigh; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        // Checks if the pixel is not exactly like the background
+                        if ((dataPtrRead + nChan * x + widthStep * y)[0] != dataPtrRead[0] ||
+                            (dataPtrRead + nChan * x + widthStep * y)[1] != dataPtrRead[1] ||
+                            (dataPtrRead + nChan * x + widthStep * y)[2] != dataPtrRead[2])
+                        {
+                            // Clears the neighbors
+                            neighbors.Clear();
+
+                            // Checks the left pixel
+                            if (x - 1 >= 0 && x - 1 < width && labels[x - 1, y] != 0)
+                            {
+                                neighbors.Add(labels[x - 1, y]);
+                            }
+                            // Checks the right pixel
+                            if (y - 1 >= 0 && y - 1 < heigh && labels[x, y - 1] != 0)
+                            {
+                                neighbors.Add(labels[x, y - 1]);
+                            }
+
+                            // If it has no neighbors creates a new link 
+                            // (to itself) and increments the label
+                            if (neighbors.Count == 0)
+                            {
+                                labels[x, y] = nextLabel;
+                                linked.Add(nextLabel, nextLabel);
+                                nextLabel++;
+                            }
+                            else
+                            {
+                                // If it contains 1 neighbor the lowest is that
+                                // one, otherwise, finds the smallest
+                                int lowest = neighbors.Count == 1 ?
+                                    neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
+
+                                labels[x, y] = lowest;
+
+                                // Cycles through the neighbors
+                                for (int i = 0; i < neighbors.Count; i++)
+                                {
+                                    // If the lowest value is less than the
+                                    // current, by the parent recursively
+                                    if (lowest < linked[neighbors[i]])
+                                    {                        
+                                        int newTag = labels[x, y];
+                                        int prevTag = 0;
+
+                                        while (newTag != prevTag)
+                                        {
+                                            prevTag = newTag;
+                                            newTag = linked[newTag];
+                                        }
+                                        linked[neighbors[i]] = newTag;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // This is consuming ~150 ms in my PC, but it's to be removed so...
+                Bgr[] bgrs = new Bgr[1000];
+
+                Random rnd = new Random(); ;
+
+                for (int i = 0; i < 1000; i++)
+                {
+                    bgrs[i] = new Bgr(rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255));
+                }
+
+                for (int y = 0; y < heigh; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (labels[x, y] == 0) continue;
+
+                        // This part can be only above, but it fucks up the
+                        // top edges on diagonals
+                        int newTag = labels[x, y];
+                        int prevTag = 0;
+
+                        while (newTag != prevTag)
+                        {
+                            prevTag = newTag;
+                            newTag = linked[newTag];
+                        }
+                        labels[x, y] = newTag; 
+                        
+                        (dataPtrWrite + nChan * x + widthStep * y)[0] = (byte)bgrs[labels[x, y]].Blue;
+                        (dataPtrWrite + nChan * x + widthStep * y)[1] = (byte)bgrs[labels[x, y]].Green;
+                        (dataPtrWrite + nChan * x + widthStep * y)[2] = (byte)bgrs[labels[x, y]].Red;
+                    }
+                }
+            }
+        }
     }
 }

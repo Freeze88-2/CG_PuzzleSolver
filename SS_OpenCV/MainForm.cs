@@ -287,5 +287,24 @@ namespace CG_OpenCV
             his.Show();
             Cursor = Cursors.Default;
         }
+
+        private void randomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor 
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.DetectIndependentObjects(img, imgUndo);
+
+            ImageViewer.Image = img.Bitmap;
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
     }
 }
