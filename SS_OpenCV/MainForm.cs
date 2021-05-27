@@ -306,5 +306,57 @@ namespace CG_OpenCV
 
             Cursor = Cursors.Default;
         }
+
+        private void blackWhiteTresholdToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null)
+            {
+                return;
+            }
+
+            Cursor = Cursors.WaitCursor;
+
+            imgUndo = img.Copy();
+
+            InputBox tresholdBox = new InputBox("Binary treshold 0-255");
+            tresholdBox.ShowDialog();
+            if (string.IsNullOrEmpty(tresholdBox.ValueTextBox.Text))
+                return;
+            int t = Convert.ToInt32(tresholdBox.ValueTextBox.Text);
+
+            ImageClass.ConvertToBW(img, t);
+
+            ImageViewer.Image = img.Bitmap;
+            ImageViewer.Refresh();
+
+            Cursor = Cursors.Default;
+        }
+
+        private void blackWhiteOtsuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null)
+            {
+                return;
+            }
+
+            Cursor = Cursors.WaitCursor;
+
+            imgUndo = img.Copy();
+
+            int t = 0;
+            // Get the propper treshold from Otsu function
+            t = ImageClass.Otsu(img);
+
+            InputBox otsuValue = new InputBox("Calculated treshold");
+            otsuValue.ValueTextBox.Text = t.ToString();
+            otsuValue.ShowDialog();
+
+            ImageClass.ConvertToBW(img, t);
+
+            ImageViewer.Image = img.Bitmap;
+            ImageViewer.Refresh();
+
+            Cursor = Cursors.Default;
+        }
     }
 }
