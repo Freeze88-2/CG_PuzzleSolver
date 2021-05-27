@@ -1433,7 +1433,7 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        public static void DetectIndependentObjects(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        public static void DetectIndependentObjects_RandomColor(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
             unsafe
             {
@@ -1498,6 +1498,7 @@ namespace CG_OpenCV
                                 int lowest = neighbors.Count == 1 ?
                                     neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
 
+
                                 labels[x, y] = lowest;
 
                                 // Cycles through the neighbors
@@ -1557,6 +1558,40 @@ namespace CG_OpenCV
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Function that solves the puzzle
+        /// </summary>
+        /// <param name="img">Input/Output image</param>
+        /// <param name="imgCopy">Image Copy</param>
+        /// <param name="Pieces_positions">List of positions (Left-x,Top-y,Right-x,Bottom-y) of all detected pieces</param>
+        /// <param name="Pieces_angle">List of detected pieces' angles</param>
+        /// <param name="level">Level of image</param>
+        public static void puzzle(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, out List<int[]> Pieces_positions, out List<int> Pieces_angle, int level)
+        {
+            Pieces_positions = new List<int[]>();
+            int[] piece_vector = new int[4];
+            Bgr backgroundColor = new Bgr(0,0,0);
+            unsafe
+            {
+                MIplImage mUndo = imgCopy.MIplImage;
+
+                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                backgroundColor.Red = dataPtrRead[0];
+                backgroundColor.Green = dataPtrRead[1];
+                backgroundColor.Blue = dataPtrRead[2];
+            }
+
+            piece_vector[0] = 65;   // x- Top-Left 
+            piece_vector[1] = 385;  // y- Top-Left
+            piece_vector[2] = 1089; // x- Bottom-Right
+            piece_vector[3] = 1411; // y- Bottom-Right
+
+            Pieces_positions.Add(piece_vector);
+
+            Pieces_angle = new List<int>();
+            Pieces_angle.Add(0); // angle
         }
     }
 }
