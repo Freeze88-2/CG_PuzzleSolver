@@ -281,8 +281,8 @@ namespace CG_OpenCV
             //copy Undo Image
             imgUndo = img.Copy();
 
-            int[] toSend = ImageClass.GetImageHistogram(img, img);
-            Histogram his = new Histogram(toSend);
+            int[][] histogram = ImageClass.Histogram_All(img);
+            Histogram his = new Histogram(histogram);
 
             his.Show();
             Cursor = Cursors.Default;
