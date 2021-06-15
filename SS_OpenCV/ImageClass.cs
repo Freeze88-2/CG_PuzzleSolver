@@ -2,7 +2,7 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Drawing;
 
 namespace CG_OpenCV
 {
@@ -1202,18 +1202,18 @@ namespace CG_OpenCV
                 MIplImage mUndo = imgCopy.MIplImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
-                byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
 
                 int width = imgCopy.Width;
                 int heigh = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
-                // Stores the current tag as key and the equity tag - Not sure about the performance cost tho.
-                Dictionary<int, int> linked = new Dictionary<int, int>();
+                // Stores the current tag as key and the equity tag 
+                int[] linked = new int[width * heigh];
 
                 // Temporarily stores the neighbors of the current pixel - Not sure about the performance cost tho.
-                List<int> neighbors = new List<int>();
+                int[] neighbors = new int[2];
 
                 // Contains the labels for each pixel
                 int[,] labels = new int[width, heigh];
@@ -1230,44 +1230,46 @@ namespace CG_OpenCV
                             (dataPtrRead + nChan * x + widthStep * y)[1] != dataPtrRead[1] ||
                             (dataPtrRead + nChan * x + widthStep * y)[2] != dataPtrRead[2])
                         {
-                            // Clears the neighbors
-                            neighbors.Clear();
+                            int nNeigh = 0;
 
                             // Checks the left pixel
                             if (x - 1 >= 0 && x - 1 < width && labels[x - 1, y] != 0)
                             {
-                                neighbors.Add(labels[x - 1, y]);
+                                neighbors[nNeigh] = labels[x - 1, y];
+                                nNeigh++;
                             }
                             // Checks the right pixel
                             if (y - 1 >= 0 && y - 1 < heigh && labels[x, y - 1] != 0)
                             {
-                                neighbors.Add(labels[x, y - 1]);
+                                neighbors[nNeigh] = labels[x, y - 1];
+                                nNeigh++;
                             }
 
                             // If it has no neighbors creates a new link 
                             // (to itself) and increments the label
-                            if (neighbors.Count == 0)
+                            if (nNeigh == 0)
                             {
                                 labels[x, y] = nextLabel;
-                                linked.Add(nextLabel, nextLabel);
+                                //linked.Add(nextLabel, nextLabel);
+                                linked[nextLabel] = nextLabel;
                                 nextLabel++;
                             }
                             else
                             {
                                 // If it contains 1 neighbor the lowest is that
                                 // one, otherwise, finds the smallest
-                                int lowest = neighbors.Count == 1 ?
+                                int lowest = nNeigh == 1 ?
                                     neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
 
                                 labels[x, y] = lowest;
 
                                 // Cycles through the neighbors
-                                for (int i = 0; i < neighbors.Count; i++)
+                                for (int i = 0; i < nNeigh; i++)
                                 {
                                     // If the lowest value is less than the
                                     // current, by the parent recursively
-                                    if (lowest < linked[neighbors[i]])
-                                    {                        
+                                    if (lowest < linked[neighbors[i]] )
+                                    {
                                         int newTag = labels[x, y];
                                         int prevTag = 0;
 
@@ -1283,16 +1285,7 @@ namespace CG_OpenCV
                         }
                     }
                 }
-
-                // This is consuming ~150 ms in my PC, but it's to be removed so...
-                Bgr[] bgrs = new Bgr[1000];
-
-                Random rnd = new Random(); ;
-
-                for (int i = 0; i < 1000; i++)
-                {
-                    bgrs[i] = new Bgr(rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255));
-                }
+                Dictionary<int, int[]> images = new Dictionary<int, int[]>();
 
                 for (int y = 0; y < heigh; y++)
                 {
@@ -1310,12 +1303,64 @@ namespace CG_OpenCV
                             prevTag = newTag;
                             newTag = linked[newTag];
                         }
-                        labels[x, y] = newTag; 
-                        
-                        (dataPtrWrite + nChan * x + widthStep * y)[0] = (byte)bgrs[labels[x, y]].Blue;
-                        (dataPtrWrite + nChan * x + widthStep * y)[1] = (byte)bgrs[labels[x, y]].Green;
-                        (dataPtrWrite + nChan * x + widthStep * y)[2] = (byte)bgrs[labels[x, y]].Red;
+                        labels[x, y] = newTag;
+
+                        if (images.ContainsKey(newTag))
+                        {
+                            if (x < images[newTag][0])
+                                images[newTag][0] = x;
+                            if (y < images[newTag][1])
+                                images[newTag][1] = y;
+
+                            if (x > images[newTag][2])
+                                images[newTag][2] = x;
+                            if (y > images[newTag][3])
+                                images[newTag][3] = y;
+                        }
+                        else
+                        {
+                            images.Add(newTag, new int[] { x, y, x, y });
+                        }
                     }
+                }
+
+                // Basically to transform a dictionary with unknown keys to
+                // an array of with a position array inside:
+                // image 1 = index 763
+                // image 2 = index 129
+                //
+                // to
+                //
+                // first image = index 0
+                // second image = index 1
+                Rectangle[] imgs = new Rectangle[images.Keys.Count];
+                int n = 0;
+
+                foreach (int k in images.Keys)
+                {
+                    imgs[n] = new Rectangle(images[k][0], images[k][1], images[k][2] - images[k][0], images[k][3] - images[k][1]);
+
+                    for (int x = imgs[n].Left; x < imgs[n].Right; x++)
+                    {
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[0] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[1] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[2] = 255;
+
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[0] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[1] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[2] = 255;
+                    }
+                    for (int y = imgs[n].Top; y < imgs[n].Bottom +1; y++)
+                    {
+                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[0] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[1] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[2] = 255;
+
+                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[0] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[1] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[2] = 255;
+                    }
+                    n++;
                 }
             }
         }
