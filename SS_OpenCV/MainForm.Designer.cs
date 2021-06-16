@@ -51,11 +51,13 @@
             this.autoZoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.binarizationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.randomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.evalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.ImageViewer = new System.Windows.Forms.PictureBox();
-            this.randomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blackWhiteTresholdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blackWhiteOtsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ImageViewer)).BeginInit();
@@ -224,6 +226,9 @@
             // 
             // binarizationToolStripMenuItem
             // 
+            this.binarizationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.blackWhiteTresholdToolStripMenuItem,
+            this.blackWhiteOtsuToolStripMenuItem});
             this.binarizationToolStripMenuItem.Name = "binarizationToolStripMenuItem";
             this.binarizationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.binarizationToolStripMenuItem.Text = "Binarilization";
@@ -235,6 +240,13 @@
             this.histogramToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.histogramToolStripMenuItem.Text = "Histogram";
             this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
+            // 
+            // randomToolStripMenuItem
+            // 
+            this.randomToolStripMenuItem.Name = "randomToolStripMenuItem";
+            this.randomToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.randomToolStripMenuItem.Text = "random";
+            this.randomToolStripMenuItem.Click += new System.EventHandler(this.randomToolStripMenuItem_Click);
             // 
             // autoresToolStripMenuItem
             // 
@@ -269,12 +281,19 @@
             this.ImageViewer.TabIndex = 6;
             this.ImageViewer.TabStop = false;
             // 
-            // randomToolStripMenuItem
+            // blackWhiteTresholdToolStripMenuItem
             // 
-            this.randomToolStripMenuItem.Name = "randomToolStripMenuItem";
-            this.randomToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.randomToolStripMenuItem.Text = "random";
-            this.randomToolStripMenuItem.Click += new System.EventHandler(this.randomToolStripMenuItem_Click);
+            this.blackWhiteTresholdToolStripMenuItem.Name = "blackWhiteTresholdToolStripMenuItem";
+            this.blackWhiteTresholdToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.blackWhiteTresholdToolStripMenuItem.Text = "Black&White Treshold";
+            this.blackWhiteTresholdToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteTresholdToolStripMenuItem_Click);
+            // 
+            // blackWhiteOtsuToolStripMenuItem
+            // 
+            this.blackWhiteOtsuToolStripMenuItem.Name = "blackWhiteOtsuToolStripMenuItem";
+            this.blackWhiteOtsuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.blackWhiteOtsuToolStripMenuItem.Text = "Black&White Otsu";
+            this.blackWhiteOtsuToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteOtsuToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -326,6 +345,8 @@
         private System.Windows.Forms.ToolStripMenuItem binarizationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem histogramToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem randomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blackWhiteTresholdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blackWhiteOtsuToolStripMenuItem;
     }
 }
 

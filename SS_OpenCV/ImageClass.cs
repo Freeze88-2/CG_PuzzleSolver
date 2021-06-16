@@ -1147,40 +1147,279 @@ namespace CG_OpenCV
         }
 
         /// <summary>
-        /// Combine the 3 channels devide it by 3 that's the index (so 255 max histogram width)
-        /// add one to that index
+        /// Diferentiation, MISSING SIDES
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        /// <returns></returns>
-        public static int[] GetImageHistogram(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        public static void Diferentiation(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
+            MIplImage write = img.MIplImage;
+            MIplImage read = imgCopy.MIplImage;
+
+            int width = imgCopy.Width;
+            int height = imgCopy.Height;
+            int colorChn = write.nChannels;
+            int widthstep = write.widthStep;
+
             unsafe
             {
-                MIplImage m = img.MIplImage;
-                MIplImage mUndo = imgCopy.MIplImage;
+                byte* dataPtrRead = (byte*)read.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)write.imageData.ToPointer();
 
-                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
-                byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
-
-                int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
-                int nChan = mUndo.nChannels;
-                int widthStep = mUndo.widthStep;
-
-                int[] vs = new int[256];
-
-                for (int y = 1; y < heigh - 1; y++)
+                for (int i = 0; i < colorChn; i++)
                 {
-                    for (int x = 1; x < width - 1; x++)
+                    // Compute the center
+                    for (int y = 0; y < height - 1; y++)
                     {
-                        int index = ((dataPtrRead + nChan * x + widthStep * y)[0] + (dataPtrRead + nChan * x + widthStep * y)[1] + (dataPtrRead + nChan * x + widthStep * y)[2]) / 3;
+                        for (int x = 0; x < width - 1; x++)
+                        {
+                            double xValue, yValue;
+                            xValue =
+                               (dataPtrRead + colorChn * (x) + widthstep * (y))[i] -
+                               (dataPtrRead + colorChn * (x + 1) + widthstep * (y))[i];
 
-                        vs[index] += 1;
+                            yValue =
+                                (dataPtrRead + colorChn * (x) + widthstep * (y))[i] -
+                               (dataPtrRead + colorChn * (x) + widthstep * (y + 1))[i];
+
+                            double dif = Math.Abs(xValue) + Math.Abs(yValue);
+                            dif = Math.Round(dif);
+                            (dataPtrWrite + colorChn * x + widthstep * y)[i] = (byte)Math.Min(Math.Max(dif, 0), 255);
+                        }
                     }
                 }
-                return vs;
             }
+        }
+
+        /// <summary>
+        /// Binarization of a given image
+        /// </summary>
+        /// <param name="img">image</param>
+        /// <param name="treshold">treshold</param>
+        public static void ConvertToBW(Image<Bgr, byte> img, int treshold)
+        {
+            MIplImage write = img.MIplImage;
+
+            int width = img.Width;
+            int height = img.Height;
+            int colorChn = write.nChannels;
+            int widthstep = write.widthStep;
+
+            unsafe
+            {
+                byte* dataPtrWrite = (byte*)write.imageData.ToPointer();
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte* p = dataPtrWrite + colorChn * (x) + widthstep * (y);
+
+                        // Grey of the current pixel
+                        float yValue = 16 + 0.257f * p[2] + 0.504f * p[1] + 0.098f * p[0];
+                        byte color;
+
+                        if (yValue < treshold)
+                            color = 0;
+                        else
+                            color = 255;
+
+                        p[0] = p[1] = p[2] = color;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Binarization of a given image using the Otsu method to find the treshold
+        /// </summary>
+        /// <param name="img"></param>
+        public static void ConvertToBW_Otsu(Image<Bgr, byte> img)
+        {
+            ConvertToBW(img, Otsu(img));
+        }
+
+        public static int[][] Histogram_All(Image<Bgr, byte> img)
+        {
+            // G RGB
+            int[][] final = new int[4][];
+            for (int i = 0; i < final.Length; i++)
+            {
+                final[i] = new int[256];
+            }
+
+            MIplImage read = img.MIplImage;
+
+            int width = img.Width;
+            int height = img.Height;
+            int colorChn = read.nChannels;
+            int widthstep = read.widthStep;
+
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)read.imageData.ToPointer();
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte* p = dataPtrRead + colorChn * (x) + widthstep * (y);
+                        float yValue = 16 + 0.257f * p[2] + 0.504f * p[1] + 0.098f * p[0];
+                        final[0][(byte)Math.Round(yValue)]++;
+                        final[1][p[2]]++;
+                        final[2][p[1]]++;
+                        final[3][p[0]]++;
+                    }
+                }
+            }
+            return final;
+        }
+
+        public static int[] Histogram_Gray(Image<Bgr, byte> img)
+        {
+            // G RGB
+            int[] final = new int[256];
+
+            MIplImage read = img.MIplImage;
+
+            int width = img.Width;
+            int height = img.Height;
+            int colorChn = read.nChannels;
+            int widthstep = read.widthStep;
+
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)read.imageData.ToPointer();
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte* p = dataPtrRead + colorChn * (x) + widthstep * (y);
+                        float yValue = 16 + 0.257f * p[2] + 0.504f * p[1] + 0.098f * p[0];
+                        final[(byte)Math.Round(yValue)]++;
+                    }
+                }
+            }
+            return final;
+        }
+
+        public static int[][] Histogram_RGB(Image<Bgr, byte> img)
+        {
+            // G RGB
+            int[][] final = new int[3][];
+            for (int i = 0; i < final.Length; i++)
+            {
+                final[i] = new int[256];
+            }
+
+            MIplImage read = img.MIplImage;
+
+            int width = img.Width;
+            int height = img.Height;
+            int colorChn = read.nChannels;
+            int widthstep = read.widthStep;
+
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)read.imageData.ToPointer();
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte* p = dataPtrRead + colorChn * (x) + widthstep * (y);
+                        final[0][p[2]]++;
+                        final[1][p[1]]++;
+                        final[2][p[0]]++;
+                    }
+                }
+            }
+            return final;
+        }
+
+        /// <summary>
+        /// Otsu Treshold given an image
+        /// </summary>
+        /// <returns>Treshold to be used in binarization</returns>
+        public static int Otsu(Image<Bgr, byte> img)
+        {
+            // Compute histogram part of the algorithm
+            // Probabilities etc... 
+            int[] histogram = ImageClass.Histogram_Gray(img);
+            float[] probabilities = new float[histogram.Length];
+            int pixelCount = img.Width * img.Height;
+
+            for (int i = 0; i < histogram.Length; i++)
+            {
+                probabilities[i] = (float)histogram[i] / (float)pixelCount;
+            }
+
+            int treshold = 0;
+            float max = 0;
+
+
+            // Somatorio de probabilidades 0 a t
+            float q1 = 0;
+            // Somatorio de probabilidades de t a 255
+            float q2 = 0;
+            float q12;
+
+            for (int t = 0; t < 256; t++)
+            {
+                q1 = sum(0, t, probabilities);
+                q2 = sum(t + 1, 255, probabilities);
+                q12 = q1 * q2;
+                float u12 = (weightedSum(0, t, probabilities) / q1) - (weightedSum(t + 1, 255, probabilities) / q2);
+                float ots = q12 * u12 * u12;
+
+                if (ots >= max)
+                {
+                    treshold = t;
+                    max = ots;
+                }
+            }
+
+            return treshold;
+        }
+
+        /// <summary>
+        /// Sums the probabilities from the array from start index to end index in a handy onliner
+        /// </summary>
+        /// <param name="start">Start index</param>
+        /// <param name="end">End index</param>
+        /// <param name="probabilities">array containing probabilities</param>
+        /// <returns>Comulative probabilty</returns>
+        public static float sum(int start, int end, float[] probabilities)
+        {
+            float sum = 0;
+            int i;
+            for (i = start; i <= end; i++)
+            {
+                sum += probabilities[i];
+            }
+
+            return sum;
+        }
+
+        /// <summary>
+        /// Does the same as sum, but weighing in the index of the array, used in Otsu
+        /// </summary>
+        /// <param name="start">start index</param>
+        /// <param name="end">end index</param>
+        /// <param name="probabilities">probabilities to sum</param>
+        /// <returns>Comulative weighted probability</returns>
+        public static float weightedSum(int start, int end, float[] probabilities)
+        {
+            float sum = 0;
+            int i;
+            for (i = start; i <= end; i++)
+            {
+                sum += i * probabilities[i];
+            }
+
+            return sum;
         }
 
         /// <summary>
@@ -1194,7 +1433,7 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        public static void DetectIndependentObjects(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        public static void DetectIndependentObjects_RandomColor(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
             unsafe
             {
@@ -1260,6 +1499,7 @@ namespace CG_OpenCV
                                 // one, otherwise, finds the smallest
                                 int lowest = nNeigh == 1 ?
                                     neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
+
 
                                 labels[x, y] = lowest;
 
@@ -1363,6 +1603,40 @@ namespace CG_OpenCV
                     n++;
                 }
             }
+        }
+
+        /// <summary>
+        /// Function that solves the puzzle
+        /// </summary>
+        /// <param name="img">Input/Output image</param>
+        /// <param name="imgCopy">Image Copy</param>
+        /// <param name="Pieces_positions">List of positions (Left-x,Top-y,Right-x,Bottom-y) of all detected pieces</param>
+        /// <param name="Pieces_angle">List of detected pieces' angles</param>
+        /// <param name="level">Level of image</param>
+        public static void puzzle(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, out List<int[]> Pieces_positions, out List<int> Pieces_angle, int level)
+        {
+            Pieces_positions = new List<int[]>();
+            int[] piece_vector = new int[4];
+            Bgr backgroundColor = new Bgr(0,0,0);
+            unsafe
+            {
+                MIplImage mUndo = imgCopy.MIplImage;
+
+                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                backgroundColor.Red = dataPtrRead[0];
+                backgroundColor.Green = dataPtrRead[1];
+                backgroundColor.Blue = dataPtrRead[2];
+            }
+
+            piece_vector[0] = 65;   // x- Top-Left 
+            piece_vector[1] = 385;  // y- Top-Left
+            piece_vector[2] = 1089; // x- Bottom-Right
+            piece_vector[3] = 1411; // y- Bottom-Right
+
+            Pieces_positions.Add(piece_vector);
+
+            Pieces_angle = new List<int>();
+            Pieces_angle.Add(0); // angle
         }
     }
 }
