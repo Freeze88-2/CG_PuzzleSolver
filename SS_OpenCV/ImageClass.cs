@@ -2,7 +2,6 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace CG_OpenCV
 {
@@ -694,7 +693,6 @@ namespace CG_OpenCV
                 {
                     for (int x = 0; x < width; x++)
                     {
-
                         double cos = Math.Cos(angle);
                         double sin = Math.Sin(angle);
 
@@ -1346,7 +1344,7 @@ namespace CG_OpenCV
         public static int Otsu(Image<Bgr, byte> img)
         {
             // Compute histogram part of the algorithm
-            // Probabilities etc... 
+            // Probabilities etc...
             int[] histogram = ImageClass.Histogram_Gray(img);
             float[] probabilities = new float[histogram.Length];
             int pixelCount = img.Width * img.Height;
@@ -1358,7 +1356,6 @@ namespace CG_OpenCV
 
             int treshold = 0;
             float max = 0;
-
 
             // Somatorio de probabilidades 0 a t
             float q1 = 0;
@@ -1422,7 +1419,6 @@ namespace CG_OpenCV
             return sum;
         }
 
-
         /// <summary>
         /// Rotates a single puzzle piece on it's center
         /// </summary>
@@ -1434,50 +1430,48 @@ namespace CG_OpenCV
         /// <param name="angle"></param>
         public unsafe static void Rotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece piece, float angle)
         {
-            unsafe
+            byte red, green, blue;
+            int x0, y0;
+
+            // center position of the image
+            double W = piece.Top.x + (piece.Width / 2f);
+            double H = piece.Top.y + (piece.Height / 2f);
+
+            double cos = Math.Cos(angle);
+            double sin = Math.Sin(angle);
+
+            for (int y = piece.Top.y; y < piece.Bottom.y; y++)
             {
-                byte red, green, blue;
-                int x0, y0;
-
-                // center position of the image
-                double W = piece.Top.x + (piece.Width / 2f);
-                double H = piece.Top.y + (piece.Height / 2f);
-
-                double cos = Math.Cos(angle);
-                double sin = Math.Sin(angle);
-
-                for (int y = piece.Top.y; y < piece.Bottom.y; y++)
+                for (int x = piece.Top.x; x < piece.Bottom.x; x++)
                 {
-                    for (int x = piece.Top.x; x < piece.Bottom.x; x++)
+                    x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
+                    y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
+
+                    if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
                     {
-                        x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
-                        y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
-
-                        if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
-                        {
-                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
-                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
-                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
-                        }
-                        else
-                        {
-                            red = dataPtrRead[2];
-                            green = dataPtrRead[1];
-                            blue = dataPtrRead[0];
-                        }
-
-                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
-                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
-                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
+                        red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
+                        green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
+                        blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
                     }
+                    else
+                    {
+                        red = dataPtrRead[2];
+                        green = dataPtrRead[1];
+                        blue = dataPtrRead[0];
+                    }
+
+                    (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
+                    (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
+                    (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
                 }
             }
         }
+
         /// <summary>
         /// Connected components algorithm, it takes the 0,0 pixel as the
         /// background color and finds and tags any images inside.
-        /// 
-        /// TODO: 
+        ///
+        /// TODO:
         /// - Optimize further. It takes about ~180 ms in my PC, making it
         /// quite slow.
         /// - Sort the tagged images into an image array or something
@@ -1486,198 +1480,194 @@ namespace CG_OpenCV
         /// <param name="imgCopy"></param>
         public unsafe static PuzzlePiece[] DetectIndependentObjects(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, int width, int heigh)
         {
-            unsafe
+            // Stores the current tag as key and the equity tag
+            int[] linked = new int[width * heigh];
+
+            // Temporarily stores the neighbors of the current pixel - Not sure about the performance cost tho.
+            int[] neighbors = new int[2];
+
+            // Contains the labels for each pixel
+            int[,] labels = new int[width, heigh];
+
+            // The next label to be given
+            int nextLabel = 1;
+
+            for (int y = 0; y < heigh; y++)
             {
-                // Stores the current tag as key and the equity tag 
-                int[] linked = new int[width * heigh];
-
-                // Temporarily stores the neighbors of the current pixel - Not sure about the performance cost tho.
-                int[] neighbors = new int[2];
-
-                // Contains the labels for each pixel
-                int[,] labels = new int[width, heigh];
-
-                // The next label to be given
-                int nextLabel = 1;
-
-                for (int y = 0; y < heigh; y++)
+                for (int x = 0; x < width; x++)
                 {
-                    for (int x = 0; x < width; x++)
+                    // Checks if the pixel is not exactly like the background
+                    if (!IsPixelBackGroundColor(x, y))
                     {
-                        // Checks if the pixel is not exactly like the background
-                        if (!IsPixelBackGroundColor(x, y))
+                        int nNeigh = 0;
+
+                        // Checks the left pixel
+                        if (x - 1 >= 0 && x - 1 < width && labels[x - 1, y] != 0)
                         {
-                            int nNeigh = 0;
+                            neighbors[nNeigh] = labels[x - 1, y];
+                            nNeigh++;
+                        }
+                        // Checks the right pixel
+                        if (y - 1 >= 0 && y - 1 < heigh && labels[x, y - 1] != 0)
+                        {
+                            neighbors[nNeigh] = labels[x, y - 1];
+                            nNeigh++;
+                        }
 
-                            // Checks the left pixel
-                            if (x - 1 >= 0 && x - 1 < width && labels[x - 1, y] != 0)
+                        // If it has no neighbors creates a new link
+                        // (to itself) and increments the label
+                        if (nNeigh == 0)
+                        {
+                            labels[x, y] = nextLabel;
+                            //linked.Add(nextLabel, nextLabel);
+                            linked[nextLabel] = nextLabel;
+                            nextLabel++;
+                        }
+                        else
+                        {
+                            // If it contains 1 neighbor the lowest is that
+                            // one, otherwise, finds the smallest
+                            int lowest = nNeigh == 1 ?
+                                neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
+
+                            labels[x, y] = lowest;
+
+                            // Cycles through the neighbors
+                            for (int i = 0; i < nNeigh; i++)
                             {
-                                neighbors[nNeigh] = labels[x - 1, y];
-                                nNeigh++;
-                            }
-                            // Checks the right pixel
-                            if (y - 1 >= 0 && y - 1 < heigh && labels[x, y - 1] != 0)
-                            {
-                                neighbors[nNeigh] = labels[x, y - 1];
-                                nNeigh++;
-                            }
-
-                            // If it has no neighbors creates a new link 
-                            // (to itself) and increments the label
-                            if (nNeigh == 0)
-                            {
-                                labels[x, y] = nextLabel;
-                                //linked.Add(nextLabel, nextLabel);
-                                linked[nextLabel] = nextLabel;
-                                nextLabel++;
-                            }
-                            else
-                            {
-                                // If it contains 1 neighbor the lowest is that
-                                // one, otherwise, finds the smallest
-                                int lowest = nNeigh == 1 ?
-                                    neighbors[0] : Math.Min(neighbors[0], neighbors[1]);
-
-
-                                labels[x, y] = lowest;
-
-                                // Cycles through the neighbors
-                                for (int i = 0; i < nNeigh; i++)
+                                // If the lowest value is less than the
+                                // current, by the parent recursively
+                                if (lowest < linked[neighbors[i]])
                                 {
-                                    // If the lowest value is less than the
-                                    // current, by the parent recursively
-                                    if (lowest < linked[neighbors[i]])
-                                    {
-                                        int newTag = labels[x, y];
-                                        int prevTag = 0;
+                                    int newTag = labels[x, y];
+                                    int prevTag = 0;
 
-                                        while (newTag != prevTag)
-                                        {
-                                            prevTag = newTag;
-                                            newTag = linked[newTag];
-                                        }
-                                        linked[neighbors[i]] = newTag;
+                                    while (newTag != prevTag)
+                                    {
+                                        prevTag = newTag;
+                                        newTag = linked[newTag];
                                     }
+                                    linked[neighbors[i]] = newTag;
                                 }
                             }
                         }
                     }
                 }
-                Dictionary<int, int[]> images = new Dictionary<int, int[]>();
+            }
+            Dictionary<int, int[]> images = new Dictionary<int, int[]>();
 
-                for (int y = 0; y < heigh; y++)
+            for (int y = 0; y < heigh; y++)
+            {
+                for (int x = 0; x < width; x++)
                 {
-                    for (int x = 0; x < width; x++)
+                    if (labels[x, y] == 0) continue;
+
+                    // This part can be only above, but it fucks up the
+                    // top edges on diagonals, but removing on top for
+                    // this one only slows it down ALOT
+                    int newTag = labels[x, y];
+                    int prevTag = 0;
+
+                    while (newTag != prevTag)
                     {
-                        if (labels[x, y] == 0) continue;
-
-                        // This part can be only above, but it fucks up the
-                        // top edges on diagonals, but removing on top for
-                        // this one only slows it down ALOT
-                        int newTag = labels[x, y];
-                        int prevTag = 0;
-
-                        while (newTag != prevTag)
-                        {
-                            prevTag = newTag;
-                            newTag = linked[newTag];
-                        }
-                        labels[x, y] = newTag;
-
-                        if (images.ContainsKey(newTag))
-                        {
-                            if (x < images[newTag][0])
-                                images[newTag][0] = x;
-                            if (y < images[newTag][1])
-                                images[newTag][1] = y;
-
-                            if (x > images[newTag][2])
-                                images[newTag][2] = x;
-                            if (y > images[newTag][3])
-                                images[newTag][3] = y;
-                        }
-                        else
-                        {
-                            images.Add(newTag, new int[] { x, y, x, y });
-                        }
+                        prevTag = newTag;
+                        newTag = linked[newTag];
                     }
-                }
+                    labels[x, y] = newTag;
 
-                // Basically to transform a dictionary with unknown keys to
-                // an array where each unique image has +1 of the previous id:
-                // image 1 = index 763
-                // image 2 = index 129
-                //
-                // to
-                //
-                // image 1 = index 0
-                // image 2 = index 1
-                // 
-                // Also rotates the images
-                PuzzlePiece[] imgs = new PuzzlePiece[images.Keys.Count];
-                int n = 0;
-
-                foreach (int k in images.Keys)
-                {
-                    Vector2Int? top = null;
-                    Vector2Int? bot = null;
-
-                    // Check if the image is rotated
-                    if (IsPixelBackGroundColor(images[k][0], images[k][1]))
+                    if (images.ContainsKey(newTag))
                     {
-                        // This only works for images rotated counter clockwise
-                        for (int x = images[k][0]; x <= images[k][2]; x++)
-                        {
-                            if (!IsPixelBackGroundColor(x, images[k][1]))
-                            {
-                                top = new Vector2Int(x, images[k][1]);
-                            }
-                            if (!IsPixelBackGroundColor(x, images[k][3]) && !bot.HasValue)
-                            {
-                                bot = new Vector2Int(x, images[k][3]);
-                            }
-                        }
-                        Vector2Int bottomRight = new Vector2Int();
+                        if (x < images[newTag][0])
+                            images[newTag][0] = x;
+                        if (y < images[newTag][1])
+                            images[newTag][1] = y;
 
-                        for (int y = images[k][1]; y <= images[k][3]; y++)
-                        {
-                            if (!IsPixelBackGroundColor(images[k][2], y))
-                            {
-                                bottomRight = new Vector2Int(images[k][2], y);
-                            }
-                        }
-                        // Generates the piece
-                        imgs[n] = new PuzzlePiece(top.Value, bot.Value);
-
-                        // Creates an extra piece with the bounding box
-                        Vector2Int boundingX = new Vector2Int(images[k][0], images[k][1]);
-                        Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
-                        PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
-
-                        double delta = imgs[n].ImageAngle(bottomRight);
-                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)(delta * Math.PI / 180));
+                        if (x > images[newTag][2])
+                            images[newTag][2] = x;
+                        if (y > images[newTag][3])
+                            images[newTag][3] = y;
                     }
                     else
                     {
-                        top = new Vector2Int(images[k][0], images[k][1]);
-                        bot = new Vector2Int(images[k][2], images[k][3]);
-                        imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+                        images.Add(newTag, new int[] { x, y, x, y });
                     }
-                    n++;
                 }
-                // Think this should be a && operator, in it's current state if it has the
-                // same red, blue or green, will assume it's background when it's not
-                // still would be a big coincidence.
-                // Note: japanese temple was giving problems cuz of this
-                bool IsPixelBackGroundColor(int x, int y)
-                {
-                    return (
-                        (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
-                        (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                        (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
-                }
-                return imgs;
             }
+
+            // Basically to transform a dictionary with unknown keys to
+            // an array where each unique image has +1 of the previous id:
+            // image 1 = index 763
+            // image 2 = index 129
+            //
+            // to
+            //
+            // image 1 = index 0
+            // image 2 = index 1
+            //
+            // Also rotates the images
+            PuzzlePiece[] imgs = new PuzzlePiece[images.Keys.Count];
+            int n = 0;
+
+            foreach (int k in images.Keys)
+            {
+                Vector2Int? top = null;
+                Vector2Int? bot = null;
+
+                // Check if the image is rotated
+                if (IsPixelBackGroundColor(images[k][0], images[k][1]))
+                {
+                    // This only works for images rotated counter clockwise
+                    for (int x = images[k][0]; x <= images[k][2]; x++)
+                    {
+                        if (!IsPixelBackGroundColor(x, images[k][1]))
+                        {
+                            top = new Vector2Int(x, images[k][1]);
+                        }
+                        if (!IsPixelBackGroundColor(x, images[k][3]) && !bot.HasValue)
+                        {
+                            bot = new Vector2Int(x, images[k][3]);
+                        }
+                    }
+                    Vector2Int bottomRight = new Vector2Int();
+
+                    for (int y = images[k][1]; y <= images[k][3]; y++)
+                    {
+                        if (!IsPixelBackGroundColor(images[k][2], y))
+                        {
+                            bottomRight = new Vector2Int(images[k][2], y);
+                        }
+                    }
+                    // Generates the piece
+                    imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+
+                    // Creates an extra piece with the bounding box
+                    Vector2Int boundingX = new Vector2Int(images[k][0], images[k][1]);
+                    Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
+                    PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
+
+                    double delta = imgs[n].ImageAngle(bottomRight);
+                    Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)(delta * Math.PI / 180));
+                }
+                else
+                {
+                    top = new Vector2Int(images[k][0], images[k][1]);
+                    bot = new Vector2Int(images[k][2], images[k][3]);
+                    imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+                }
+                n++;
+            }
+            // Think this should be a && operator, in it's current state if it has the
+            // same red, blue or green, will assume it's background when it's not
+            // still would be a big coincidence.
+            // Note: japanese temple was giving problems cuz of this
+            bool IsPixelBackGroundColor(int x, int y)
+            {
+                return (
+                    (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
+                    (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
+                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+            }
+            return imgs;
         }
 
         /// <summary>
@@ -1750,7 +1740,7 @@ namespace CG_OpenCV
                 backgroundColor.Blue = dataPtrRead[2];
             }
 
-            piece_vector[0] = 65;   // x- Top-Left 
+            piece_vector[0] = 65;   // x- Top-Left
             piece_vector[1] = 385;  // y- Top-Left
             piece_vector[2] = 1089; // x- Bottom-Right
             piece_vector[3] = 1411; // y- Bottom-Right
