@@ -1487,21 +1487,10 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        public static void DetectIndependentObjects(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        public unsafe static PuzzlePiece[] DetectIndependentObjects(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, int width, int heigh)
         {
             unsafe
             {
-                MIplImage m = img.MIplImage;
-                MIplImage mUndo = imgCopy.MIplImage;
-
-                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
-                byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
-
-                int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
-                int nChan = mUndo.nChannels;
-                int widthStep = mUndo.widthStep;
-
                 // Stores the current tag as key and the equity tag 
                 int[] linked = new int[width * heigh];
 
@@ -1649,8 +1638,10 @@ namespace CG_OpenCV
                                 bot = new Vector2Int(x, images[k][3]);
                             }
                         }
+                        // Generates the piece
                         imgs[n] = new PuzzlePiece(top.Value, bot.Value);
 
+                        // Creates an extra piece with the bounding box
                         Vector2Int boundingX = new Vector2Int(images[k][0], images[k][1]);
                         Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
                         PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
@@ -1664,39 +1655,54 @@ namespace CG_OpenCV
                         bot = new Vector2Int(images[k][2], images[k][3]);
                         imgs[n] = new PuzzlePiece(top.Value, bot.Value);
                     }
-
-                    // Draw a bounding box around each unique image
-                    for (int x = imgs[n].Top.x; x < imgs[n].Bottom.x; x++)
-                    {
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[0] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[1] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[2] = 255;
-
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[0] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[1] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[2] = 255;
-                    }
-                    for (int y = imgs[n].Top.y; y < imgs[n].Bottom.y + 1; y++)
-                    {
-                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[0] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[1] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[2] = 255;
-
-                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[0] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[1] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[2] = 255;
-                    }
                     n++;
                 }
                 // Think this should be a && operator, in it's current state if it has the
                 // same red, blue or green, will assume it's background when it's not
                 // still would be a big coincidence.
+                // Note: japanese temple was giving problems cuz of this
                 bool IsPixelBackGroundColor(int x, int y)
                 {
                     return (
                         (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
                         (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
                         (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+                }
+                return imgs;
+            }
+        }
+
+        /// <summary>
+        /// Draws a red bounding box around the image
+        /// </summary>
+        /// <param name="dataPtrWrite"></param>
+        /// <param name="nChan"></param>
+        /// <param name="widthStep"></param>
+        /// <param name="images"></param>
+        private unsafe static void DrawBoundingBoxes(byte* dataPtrWrite, int nChan, int widthStep, PuzzlePiece[] images)
+        {
+            for (int n = 0; n < images.Length; n++)
+            {
+                // Draw a bounding box around each unique image
+                for (int x = images[n].Top.x; x < images[n].Bottom.x; x++)
+                {
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Top.y)[0] = 0;
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Top.y)[1] = 0;
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Top.y)[2] = 255;
+
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Bottom.y)[0] = 0;
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Bottom.y)[1] = 0;
+                    (dataPtrWrite + nChan * x + widthStep * images[n].Bottom.y)[2] = 255;
+                }
+                for (int y = images[n].Top.y; y <= images[n].Bottom.y; y++)
+                {
+                    (dataPtrWrite + nChan * images[n].Top.x + widthStep * y)[0] = 0;
+                    (dataPtrWrite + nChan * images[n].Top.x + widthStep * y)[1] = 0;
+                    (dataPtrWrite + nChan * images[n].Top.x + widthStep * y)[2] = 255;
+
+                    (dataPtrWrite + nChan * images[n].Bottom.x + widthStep * y)[0] = 0;
+                    (dataPtrWrite + nChan * images[n].Bottom.x + widthStep * y)[1] = 0;
+                    (dataPtrWrite + nChan * images[n].Bottom.x + widthStep * y)[2] = 255;
                 }
             }
         }
@@ -1714,11 +1720,23 @@ namespace CG_OpenCV
             Pieces_positions = new List<int[]>();
             int[] piece_vector = new int[4];
             Bgr backgroundColor = new Bgr(0, 0, 0);
+
             unsafe
             {
+                MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
+
+                int width = imgCopy.Width;
+                int heigh = imgCopy.Height;
+                int nChan = mUndo.nChannels;
+                int widthStep = mUndo.widthStep;
+
+                PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, heigh);
+                DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
+
                 backgroundColor.Red = dataPtrRead[0];
                 backgroundColor.Green = dataPtrRead[1];
                 backgroundColor.Blue = dataPtrRead[2];

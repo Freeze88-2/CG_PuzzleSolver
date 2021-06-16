@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace CG_OpenCV
@@ -299,7 +300,7 @@ namespace CG_OpenCV
             //copy Undo Image
             imgUndo = img.Copy();
 
-            ImageClass.DetectIndependentObjects(img, imgUndo);
+            ImageClass.puzzle(img, imgUndo, out List<int[]> positions, out List<int> angles, 0);
 
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
