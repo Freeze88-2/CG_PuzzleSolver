@@ -2,3 +2,6 @@
 
 # Collapse XLF files in PRs by default
 *.xlf linguist-generated=true
+
+# Custom for Visual Studio
+*.cs diff=csharp

@@ -29,6 +29,8 @@ namespace CG_OpenCV
 
         public Vector2Int Top => top;
         public Vector2Int Bottom => bottom;
+        public int Height => height;
+        public int Width => width;
 
         // WARNING: add the rest of the variables for side comparison
 
@@ -42,6 +44,16 @@ namespace CG_OpenCV
         }
 
         public double ImageAngle() 
+        {
+            Vector2Int diagonal = top - bottom;
+
+            double r = Math.Atan2(diagonal.y, diagonal.x);
+            double angle = r * (180.0 / Math.PI);
+
+            return angle - 45;
+        }
+        
+        public double ImageAngle(Vector2Int top, Vector2Int bottom) 
         {
             Vector2Int diagonal = top - bottom;
 

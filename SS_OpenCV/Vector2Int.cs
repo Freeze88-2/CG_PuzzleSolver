@@ -9,7 +9,7 @@ namespace CG_OpenCV
     /// Pixel position struct
     /// Some functions to work with the positions aswell
     /// </summary>
-    struct Vector2Int
+    internal struct Vector2Int
     {
         public int x;
         public int y;

@@ -9,20 +9,6 @@ C:\Users\jplad\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.pdb
 C:\Users\jplad\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.exe
 C:\Users\jplad\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.pdb
 C:\Users\jplad\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.InputBox.resources
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.exe.config
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.exe
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.pdb
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csprojAssemblyReference.cache
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.AuthorsForm.resources
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.InputBox.resources
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.MainForm.resources
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.Properties.Resources.resources
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.GenerateResource.cache
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CoreCompileInputs.cache
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CopyComplete
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.exe
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.pdb
-C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.Histogram.resources
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\bin\Debug\CG_OpenCV.exe.config
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\bin\Debug\CG_OpenCV.exe
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\bin\Debug\CG_OpenCV.pdb
@@ -37,3 +23,17 @@ C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\obj\Debug\CG_Open
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CopyComplete
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\obj\Debug\CG_OpenCV.exe
 C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\obj\Debug\CG_OpenCV.pdb
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.exe.config
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.exe
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\bin\Debug\CG_OpenCV.pdb
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csprojAssemblyReference.cache
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.AuthorsForm.resources
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.Histogram.resources
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.InputBox.resources
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.MainForm.resources
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.Properties.Resources.resources
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.GenerateResource.cache
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CoreCompileInputs.cache
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CopyComplete
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.exe
+C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.pdb

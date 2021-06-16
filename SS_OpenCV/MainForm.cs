@@ -217,9 +217,9 @@ namespace CG_OpenCV
 
             form.ShowDialog();
 
-            double rot = Convert.ToDouble(form.ValueTextBox.Text);
+            double rot = double.Parse(form.ValueTextBox.Text);
 
-            ImageClass.Rotation(img, img, (float)rot);
+            ImageClass.Rotation(img, imgUndo, (float)(rot * Math.PI/180));
 
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen

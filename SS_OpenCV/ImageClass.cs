@@ -687,12 +687,13 @@ namespace CG_OpenCV
                 byte red, green, blue;
                 int x0, y0;
 
+                double W = width / 2f;
+                double H = heigh / 2f;
+
                 for (int y = 0; y < heigh; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        double W = width / 2f;
-                        double H = heigh / 2f;
 
                         double cos = Math.Cos(angle);
                         double sin = Math.Sin(angle);
@@ -1230,7 +1231,6 @@ namespace CG_OpenCV
             }
         }
 
-
         /// <summary>
         /// Binarization of a given image using the Otsu method to find the treshold
         /// </summary>
@@ -1422,6 +1422,57 @@ namespace CG_OpenCV
             return sum;
         }
 
+
+        /// <summary>
+        /// Rotates a single puzzle piece on it's center
+        /// </summary>
+        /// <param name="dataPtrWrite"></param>
+        /// <param name="dataPtrRead"></param>
+        /// <param name="nChan"></param>
+        /// <param name="widthStep"></param>
+        /// <param name="piece"></param>
+        /// <param name="angle"></param>
+        public unsafe static void Rotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece piece, float angle)
+        {
+            unsafe
+            {
+                byte red, green, blue;
+                int x0, y0;
+
+                double W = piece.Top.x + (piece.Width / 2f);
+                double H = piece.Top.y + (piece.Height / 2f);
+
+                for (int y = piece.Top.y; y < piece.Bottom.y; y++)
+                {
+                    for (int x = piece.Top.x; x < piece.Bottom.x; x++)
+                    {
+
+                        double cos = Math.Cos(angle);
+                        double sin = Math.Sin(angle);
+
+                        x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
+                        y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
+
+                        if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
+                        {
+                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
+                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
+                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
+                        }
+                        else
+                        {
+                            red = 0;
+                            green = 0;
+                            blue = 0;
+                        }
+
+                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
+                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
+                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
+                    }
+                }
+            }
+        }
         /// <summary>
         /// Connected components algorithm, it takes the 0,0 pixel as the
         /// background color and finds and tags any images inside.
@@ -1433,10 +1484,11 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        public static void DetectIndependentObjects_RandomColor(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        public static void DetectIndependentObjects(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
             unsafe
             {
+
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
 
@@ -1508,7 +1560,7 @@ namespace CG_OpenCV
                                 {
                                     // If the lowest value is less than the
                                     // current, by the parent recursively
-                                    if (lowest < linked[neighbors[i]] )
+                                    if (lowest < linked[neighbors[i]])
                                     {
                                         int newTag = labels[x, y];
                                         int prevTag = 0;
@@ -1534,7 +1586,8 @@ namespace CG_OpenCV
                         if (labels[x, y] == 0) continue;
 
                         // This part can be only above, but it fucks up the
-                        // top edges on diagonals
+                        // top edges on diagonals, but removing on top for
+                        // this one only slows it down ALOT
                         int newTag = labels[x, y];
                         int prevTag = 0;
 
@@ -1565,40 +1618,52 @@ namespace CG_OpenCV
                 }
 
                 // Basically to transform a dictionary with unknown keys to
-                // an array of with a position array inside:
+                // an array where each unique image has +1 of the previous id:
                 // image 1 = index 763
                 // image 2 = index 129
                 //
                 // to
                 //
-                // first image = index 0
-                // second image = index 1
-                Rectangle[] imgs = new Rectangle[images.Keys.Count];
+                // image 1 = index 0
+                // image 2 = index 1
+                PuzzlePiece[] imgs = new PuzzlePiece[images.Keys.Count];
                 int n = 0;
 
                 foreach (int k in images.Keys)
                 {
-                    imgs[n] = new Rectangle(images[k][0], images[k][1], images[k][2] - images[k][0], images[k][3] - images[k][1]);
+                    Vector2Int top = new Vector2Int(images[k][0], images[k][1]);
+                    Vector2Int bot = new Vector2Int(images[k][2], images[k][3]);
+                    imgs[n] = new PuzzlePiece(top, bot);
 
-                    for (int x = imgs[n].Left; x < imgs[n].Right; x++)
+                    // Check if the image is rotated
+                    if ((dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[0] == dataPtrRead[0] ||
+                        (dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[1] == dataPtrRead[1] ||
+                        (dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[2] == dataPtrRead[2])
                     {
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[0] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[1] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top)[2] = 255;
-
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[0] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[1] = 0;
-                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom)[2] = 255;
+                        double delta = imgs[n].ImageAngle();
+                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, imgs[n], -(float)delta);
                     }
-                    for (int y = imgs[n].Top; y < imgs[n].Bottom +1; y++)
-                    {
-                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[0] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[1] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Left + widthStep * y)[2] = 255;
 
-                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[0] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[1] = 0;
-                        (dataPtrWrite + nChan * imgs[n].Right + widthStep * y)[2] = 255;
+                    // Draw a bounding box around each unique image
+                    for (int x = imgs[n].Top.x; x < imgs[n].Bottom.x; x++)
+                    {
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[0] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[1] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Top.y)[2] = 255;
+
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[0] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[1] = 0;
+                        (dataPtrWrite + nChan * x + widthStep * imgs[n].Bottom.y)[2] = 255;
+                    }
+                    for (int y = imgs[n].Top.y; y < imgs[n].Bottom.y + 1; y++)
+                    {
+                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[0] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[1] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Top.x + widthStep * y)[2] = 255;
+
+                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[0] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[1] = 0;
+                        (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[2] = 255;
                     }
                     n++;
                 }
@@ -1617,7 +1682,7 @@ namespace CG_OpenCV
         {
             Pieces_positions = new List<int[]>();
             int[] piece_vector = new int[4];
-            Bgr backgroundColor = new Bgr(0,0,0);
+            Bgr backgroundColor = new Bgr(0, 0, 0);
             unsafe
             {
                 MIplImage mUndo = imgCopy.MIplImage;
