@@ -1442,18 +1442,20 @@ namespace CG_OpenCV
                 double W = piece.Top.x + (piece.Width / 2f);
                 double H = piece.Top.y + (piece.Height / 2f);
 
+                double cos = Math.Cos(angle);
+                double sin = Math.Sin(angle);
+
                 for (int y = piece.Top.y; y < piece.Bottom.y; y++)
                 {
                     for (int x = piece.Top.x; x < piece.Bottom.x; x++)
                     {
-
-                        double cos = Math.Cos(angle);
-                        double sin = Math.Sin(angle);
-
                         x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                         y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
 
-                        if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
+                        if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y) &&
+                            ((dataPtrRead + nChan * x0 + widthStep * y0)[0] != dataPtrRead[0] ||
+                            (dataPtrRead + nChan * x0 + widthStep * y0)[1] != dataPtrRead[1] ||
+                            (dataPtrRead + nChan * x0 + widthStep * y0)[2] != dataPtrRead[2]))
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -1461,9 +1463,9 @@ namespace CG_OpenCV
                         }
                         else
                         {
-                            red = 0;
-                            green = 0;
-                            blue = 0;
+                            red = dataPtrRead[2];
+                            green = dataPtrRead[1];
+                            blue = dataPtrRead[0];
                         }
 
                         (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
@@ -1517,9 +1519,7 @@ namespace CG_OpenCV
                     for (int x = 0; x < width; x++)
                     {
                         // Checks if the pixel is not exactly like the background
-                        if ((dataPtrRead + nChan * x + widthStep * y)[0] != dataPtrRead[0] ||
-                            (dataPtrRead + nChan * x + widthStep * y)[1] != dataPtrRead[1] ||
-                            (dataPtrRead + nChan * x + widthStep * y)[2] != dataPtrRead[2])
+                        if (!IsPixelBackGroundColor(x, y))
                         {
                             int nNeigh = 0;
 
@@ -1636,12 +1636,24 @@ namespace CG_OpenCV
                     imgs[n] = new PuzzlePiece(top, bot);
 
                     // Check if the image is rotated
-                    if ((dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[0] == dataPtrRead[0] ||
-                        (dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[1] == dataPtrRead[1] ||
-                        (dataPtrRead + nChan * imgs[n].Top.x + widthStep * imgs[n].Top.y)[2] == dataPtrRead[2])
+                    if (IsPixelBackGroundColor(imgs[n].Top.x, imgs[n].Top.y))
                     {
-                        double delta = imgs[n].ImageAngle();
-                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, imgs[n], -(float)delta);
+                        Vector2Int? newTop = null;
+                        Vector2Int? newBot = null;
+
+                        for (int x = imgs[n].Top.x; x <= imgs[n].Bottom.x; x++)
+                        {
+                            if (!IsPixelBackGroundColor(x, imgs[n].Top.y))
+                            {
+                                newTop = new Vector2Int(x, imgs[n].Top.y);
+                            }
+                            if (!IsPixelBackGroundColor(x, imgs[n].Bottom.y) && !newBot.HasValue)
+                            {
+                                newBot = new Vector2Int(x, imgs[n].Bottom.y);
+                            }
+                        }
+                        double delta = imgs[n].ImageAngle(newTop.Value, newBot.Value);
+                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, imgs[n], (float)delta);
                     }
 
                     // Draw a bounding box around each unique image
@@ -1666,6 +1678,16 @@ namespace CG_OpenCV
                         (dataPtrWrite + nChan * imgs[n].Bottom.x + widthStep * y)[2] = 255;
                     }
                     n++;
+                }
+                // Think this should be a && operator, in it's current state if it has the
+                // same red, blue or green, will assume it's background when it's not
+                // still would be a big coincidence.
+                bool IsPixelBackGroundColor(int x, int y)
+                {
+                    return (
+                        (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
+                        (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
+                        (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
                 }
             }
         }
