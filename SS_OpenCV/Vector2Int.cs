@@ -8,6 +8,7 @@ namespace CG_OpenCV
     /// </summary>
     internal struct Vector2Int
     {
+        public static Vector2Int Zero => new Vector2Int(0, 0);
         public int x;
         public int y;
 
