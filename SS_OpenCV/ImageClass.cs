@@ -1473,6 +1473,42 @@ namespace CG_OpenCV
                 }
             }
         }
+
+        public unsafe static void Translation(byte* dataPtrRead, byte* dataPtrWrite, int nChan, int widthStep, PuzzlePiece piece, int dx, int dy)
+        {
+            unsafe
+            {
+                byte red, green, blue;
+                int x0, y0;
+
+                for (int y = piece.Top.y; y <= piece.Bottom.y; y++)
+                {
+                    for (int x = piece.Top.x; x <= piece.Bottom.x; x++)
+                    {
+                        x0 = x - dx;
+                        y0 = y - dy;
+
+                        if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
+                        {
+                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
+                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
+                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
+                        }
+                        else
+                        {
+                            red = 0;
+                            green = 0;
+                            blue = 0;
+                        }
+
+                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
+                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
+                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Connected components algorithm, it takes the 0,0 pixel as the
         /// background color and finds and tags any images inside.
