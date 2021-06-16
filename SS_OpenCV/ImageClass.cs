@@ -1446,9 +1446,9 @@ namespace CG_OpenCV
                 double cos = Math.Cos(angle);
                 double sin = Math.Sin(angle);
 
-                for (int y = piece.Top.y; y < piece.Bottom.y; y++)
+                for (int y = piece.Top.y; y <= piece.Bottom.y; y++)
                 {
-                    for (int x = piece.Top.x; x < piece.Bottom.x; x++)
+                    for (int x = piece.Top.x; x <= piece.Bottom.x; x++)
                     {
                         x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                         y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);

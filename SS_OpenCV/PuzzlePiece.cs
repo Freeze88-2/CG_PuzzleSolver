@@ -33,7 +33,9 @@ namespace CG_OpenCV
         public int Width => width;
 
         // WARNING: add the rest of the variables for side comparison
-
+        private float leftDistance, rightDistance, topDistance, botDistance;
+        private float compareTreshold;
+        
         public PuzzlePiece(Vector2Int top, Vector2Int bottom) 
         {
             this.top = top;
@@ -41,16 +43,15 @@ namespace CG_OpenCV
 
             height = bottom.y - top.y;
             width = bottom.x - top.x;
+
+            compareTreshold = float.PositiveInfinity;
         }
 
         public double ImageAngle(Vector2Int rightBottom) 
         {
-            Vector2Int diagonal = top - bottom;
             Vector2Int diagonal2 = rightBottom - bottom;
 
-            double r = Math.Atan2(diagonal.y, diagonal.x);
             double r2 = Math.Atan2(diagonal2.y, diagonal2.x);
-            double angle = r * 180.0 / Math.PI;
             double angle2 = r2 * 180.0 / Math.PI;
 
             return -angle2;
@@ -58,5 +59,28 @@ namespace CG_OpenCV
 
         // Sides comparison functions
         // ETC...
+        
+        public float CompareSide(PuzzlePiece other, Side side)
+        {
+            switch (side)
+            {
+                case Side.Top:
+                    break;
+                case Side.Right:
+                    break;
+                case Side.Bottom:
+                    break;
+                case Side.Left:
+                    break;
+            }
+        }
+    }
+
+    public enum Side 
+    {
+        Top,
+        Right,
+        Bottom,
+        Left
     }
 }
