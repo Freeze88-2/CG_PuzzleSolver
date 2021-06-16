@@ -43,14 +43,17 @@ namespace CG_OpenCV
             width = bottom.x - top.x;
         }
 
-        public double ImageAngle() 
+        public double ImageAngle(Vector2Int rightBottom) 
         {
             Vector2Int diagonal = top - bottom;
+            Vector2Int diagonal2 = rightBottom - bottom;
 
             double r = Math.Atan2(diagonal.y, diagonal.x);
-            double angle = r * (180.0 / Math.PI);
+            double r2 = Math.Atan2(diagonal2.y, diagonal2.x);
+            double angle = r * 180.0 / Math.PI;
+            double angle2 = r2 * 180.0 / Math.PI;
 
-            return angle - 45;
+            return -angle2;
         }
 
         // Sides comparison functions

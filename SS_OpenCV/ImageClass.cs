@@ -1453,10 +1453,7 @@ namespace CG_OpenCV
                         x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                         y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
 
-                        if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y) &&
-                            ((dataPtrRead + nChan * x0 + widthStep * y0)[0] != dataPtrRead[0] ||
-                            (dataPtrRead + nChan * x0 + widthStep * y0)[1] != dataPtrRead[1] ||
-                            (dataPtrRead + nChan * x0 + widthStep * y0)[2] != dataPtrRead[2]))
+                        if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -1615,6 +1612,8 @@ namespace CG_OpenCV
                 //
                 // image 1 = index 0
                 // image 2 = index 1
+                // 
+                // Also rotates the images
                 PuzzlePiece[] imgs = new PuzzlePiece[images.Keys.Count];
                 int n = 0;
 
@@ -1638,6 +1637,15 @@ namespace CG_OpenCV
                                 bot = new Vector2Int(x, images[k][3]);
                             }
                         }
+                        Vector2Int bottomRight = new Vector2Int();
+
+                        for (int y = images[k][1]; y <= images[k][3]; y++)
+                        {
+                            if (!IsPixelBackGroundColor(images[k][2], y))
+                            {
+                                bottomRight = new Vector2Int(images[k][2], y);
+                            }
+                        }
                         // Generates the piece
                         imgs[n] = new PuzzlePiece(top.Value, bot.Value);
 
@@ -1646,8 +1654,8 @@ namespace CG_OpenCV
                         Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
                         PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
 
-                        double delta = imgs[n].ImageAngle();
-                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)delta);
+                        double delta = imgs[n].ImageAngle(bottomRight);
+                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)(delta * Math.PI / 180));
                     }
                     else
                     {
