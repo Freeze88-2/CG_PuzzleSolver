@@ -1439,6 +1439,7 @@ namespace CG_OpenCV
                 byte red, green, blue;
                 int x0, y0;
 
+                // center position of the image
                 double W = piece.Top.x + (piece.Width / 2f);
                 double H = piece.Top.y + (piece.Height / 2f);
 
@@ -1490,7 +1491,6 @@ namespace CG_OpenCV
         {
             unsafe
             {
-
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
 
@@ -1631,29 +1631,38 @@ namespace CG_OpenCV
 
                 foreach (int k in images.Keys)
                 {
-                    Vector2Int top = new Vector2Int(images[k][0], images[k][1]);
-                    Vector2Int bot = new Vector2Int(images[k][2], images[k][3]);
-                    imgs[n] = new PuzzlePiece(top, bot);
+                    Vector2Int? top = null;
+                    Vector2Int? bot = null;
 
                     // Check if the image is rotated
-                    if (IsPixelBackGroundColor(imgs[n].Top.x, imgs[n].Top.y))
+                    if (IsPixelBackGroundColor(images[k][0], images[k][1]))
                     {
-                        Vector2Int? newTop = null;
-                        Vector2Int? newBot = null;
-
-                        for (int x = imgs[n].Top.x; x <= imgs[n].Bottom.x; x++)
+                        // This only works for images rotated counter clockwise
+                        for (int x = images[k][0]; x <= images[k][2]; x++)
                         {
-                            if (!IsPixelBackGroundColor(x, imgs[n].Top.y))
+                            if (!IsPixelBackGroundColor(x, images[k][1]))
                             {
-                                newTop = new Vector2Int(x, imgs[n].Top.y);
+                                top = new Vector2Int(x, images[k][1]);
                             }
-                            if (!IsPixelBackGroundColor(x, imgs[n].Bottom.y) && !newBot.HasValue)
+                            if (!IsPixelBackGroundColor(x, images[k][3]) && !bot.HasValue)
                             {
-                                newBot = new Vector2Int(x, imgs[n].Bottom.y);
+                                bot = new Vector2Int(x, images[k][3]);
                             }
                         }
-                        double delta = imgs[n].ImageAngle(newTop.Value, newBot.Value);
-                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, imgs[n], (float)delta);
+                        imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+
+                        Vector2Int boundingX = new Vector2Int(images[k][0], images[k][1]);
+                        Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
+                        PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
+
+                        double delta = imgs[n].ImageAngle();
+                        Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)delta);
+                    }
+                    else
+                    {
+                        top = new Vector2Int(images[k][0], images[k][1]);
+                        bot = new Vector2Int(images[k][2], images[k][3]);
+                        imgs[n] = new PuzzlePiece(top.Value, bot.Value);
                     }
 
                     // Draw a bounding box around each unique image

@@ -52,16 +52,6 @@ namespace CG_OpenCV
 
             return angle - 45;
         }
-        
-        public double ImageAngle(Vector2Int top, Vector2Int bottom) 
-        {
-            Vector2Int diagonal = top - bottom;
-
-            double r = Math.Atan2(diagonal.y, diagonal.x);
-            double angle = r * (180.0 / Math.PI);
-
-            return angle - 45;
-        }
 
         // Sides comparison functions
         // ETC...
