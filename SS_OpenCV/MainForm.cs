@@ -78,7 +78,7 @@ namespace CG_OpenCV
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace CG_OpenCV
                 return;
             }
 
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -134,7 +134,7 @@ namespace CG_OpenCV
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace CG_OpenCV
                 return;
             }
 
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -170,7 +170,7 @@ namespace CG_OpenCV
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         private void brightnessContrastToolStripMenuItem_Click(object sender, EventArgs e)
@@ -180,7 +180,7 @@ namespace CG_OpenCV
                 return;
             }
 
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -199,7 +199,7 @@ namespace CG_OpenCV
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         private void rotationToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,7 +209,7 @@ namespace CG_OpenCV
                 return;
             }
 
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -220,12 +220,12 @@ namespace CG_OpenCV
 
             double rot = double.Parse(form.ValueTextBox.Text);
 
-            ImageClass.Rotation(img, imgUndo, (float)(rot * Math.PI/180));
+            ImageClass.Rotation(img, imgUndo, (float)(rot * Math.PI / 180));
 
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         private void translationToolStripMenuItem_Click(object sender, EventArgs e)
@@ -235,7 +235,7 @@ namespace CG_OpenCV
                 return;
             }
 
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -252,7 +252,7 @@ namespace CG_OpenCV
             ImageViewer.Image = img.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
-            Cursor = Cursors.Default; // normal cursor 
+            Cursor = Cursors.Default; // normal cursor
         }
 
         private void binarizationToolStripMenuItem_Click(object sender, EventArgs e)
@@ -261,7 +261,7 @@ namespace CG_OpenCV
             {
                 return;
             }
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -277,7 +277,7 @@ namespace CG_OpenCV
             {
                 return;
             }
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();
@@ -295,7 +295,7 @@ namespace CG_OpenCV
             {
                 return;
             }
-            Cursor = Cursors.WaitCursor; // clock cursor 
+            Cursor = Cursors.WaitCursor; // clock cursor
 
             //copy Undo Image
             imgUndo = img.Copy();

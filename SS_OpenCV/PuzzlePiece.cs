@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CG_OpenCV
 {
-
     // Top, Bottom logic for this class:
     //  Given the rectanle:
-    // Top vertice 
+    // Top vertice
     // !_____________
     // |             |
     // |             |
@@ -21,7 +17,7 @@ namespace CG_OpenCV
     /// <summary>
     /// Defines a single puzzle piece
     /// </summary>
-    class PuzzlePiece
+    internal class PuzzlePiece
     {
         private Vector2Int top, bottom;
         private int height;
@@ -34,9 +30,10 @@ namespace CG_OpenCV
 
         // WARNING: add the rest of the variables for side comparison
         private float leftDistance, rightDistance, topDistance, botDistance;
+
         private float compareTreshold;
-        
-        public PuzzlePiece(Vector2Int top, Vector2Int bottom) 
+
+        public PuzzlePiece(Vector2Int top, Vector2Int bottom)
         {
             this.top = top;
             this.bottom = bottom;
@@ -47,7 +44,7 @@ namespace CG_OpenCV
             compareTreshold = float.PositiveInfinity;
         }
 
-        public double ImageAngle(Vector2Int rightBottom) 
+        public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
         {
             Vector2Int diagonal2 = rightBottom - bottom;
 
@@ -59,24 +56,28 @@ namespace CG_OpenCV
 
         // Sides comparison functions
         // ETC...
-        
+
         public float CompareSide(PuzzlePiece other, Side side)
         {
             switch (side)
             {
                 case Side.Top:
                     break;
+
                 case Side.Right:
                     break;
+
                 case Side.Bottom:
                     break;
+
                 case Side.Left:
                     break;
             }
+            return 0;
         }
     }
 
-    public enum Side 
+    public enum Side
     {
         Top,
         Right,

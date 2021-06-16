@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using ZedGraph;
 
 namespace CG_OpenCV
 {
@@ -46,7 +39,6 @@ namespace CG_OpenCV
             chart1.ChartAreas[0].AxisX.Minimum = 0;
             chart1.ChartAreas[0].AxisX.Title = "Intensity";
             chart1.ChartAreas[0].AxisY.Title = "Pixels Count";
-
 
             chart1.ResumeLayout();
         }

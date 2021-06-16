@@ -2,7 +2,6 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CG_OpenCV
 {
@@ -1429,7 +1428,7 @@ namespace CG_OpenCV
         /// <param name="widthStep"></param>
         /// <param name="piece"></param>
         /// <param name="angle"></param>
-        public unsafe static void Rotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece piece, double angle)
+        public unsafe static void Rotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece piece, float angle)
         {
             byte red, green, blue;
             int x0, y0;
@@ -1441,12 +1440,21 @@ namespace CG_OpenCV
             double cos = Math.Cos(angle);
             double sin = Math.Sin(angle);
 
-            for (int y = piece.Top.y; y <= piece.Bottom.y; y++)
+<<<<<<< HEAD
+            for (int y = piece.Top.y; y < piece.Bottom.y; y++)
             {
-                for (int x = piece.Top.x; x <= piece.Bottom.x; x++)
+                for (int x = piece.Top.x; x < piece.Bottom.x; x++)
                 {
                     x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                     y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
+=======
+                for (int y = piece.Top.y; y <= piece.Bottom.y; y++)
+                {
+                    for (int x = piece.Top.x; x <= piece.Bottom.x; x++)
+                    {
+                        x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
+                        y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
+>>>>>>> d521378c5d93e581ad39dcb64afc11ad64e51dab
 
                     if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
                     {
@@ -1557,8 +1565,6 @@ namespace CG_OpenCV
             }
             Dictionary<int, int[]> images = new Dictionary<int, int[]>();
 
-            // Travels the image and for each pixel loops through the tags
-            // until it has the lowest tag possible
             for (int y = 0; y < heigh; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -1606,16 +1612,63 @@ namespace CG_OpenCV
             //
             // image 1 = index 0
             // image 2 = index 1
+            //
+            // Also rotates the images
             PuzzlePiece[] imgs = new PuzzlePiece[images.Keys.Count];
-            int[][] imgs2 = images.Values.ToArray();
+            int n = 0;
 
-            for (int i = 0; i < imgs2.Length; i++)
+            foreach (int k in images.Keys)
             {
-                Vector2Int top = new Vector2Int(imgs2[i][0], imgs2[i][1]);
-                Vector2Int bot = new Vector2Int(imgs2[i][2], imgs2[i][3]);
-                imgs[i] = new PuzzlePiece(top, bot);
+                Vector2Int? top = null;
+                Vector2Int? bot = null;
+
+                // Check if the image is rotated
+                if (IsPixelBackGroundColor(images[k][0], images[k][1]))
+                {
+                    // This only works for images rotated counter clockwise
+                    for (int x = images[k][0]; x <= images[k][2]; x++)
+                    {
+                        if (!IsPixelBackGroundColor(x, images[k][1]))
+                        {
+                            top = new Vector2Int(x, images[k][1]);
+                        }
+                        if (!IsPixelBackGroundColor(x, images[k][3]) && !bot.HasValue)
+                        {
+                            bot = new Vector2Int(x, images[k][3]);
+                        }
+                    }
+                    Vector2Int bottomRight = new Vector2Int();
+
+                    for (int y = images[k][1]; y <= images[k][3]; y++)
+                    {
+                        if (!IsPixelBackGroundColor(images[k][2], y))
+                        {
+                            bottomRight = new Vector2Int(images[k][2], y);
+                        }
+                    }
+                    // Generates the piece
+                    imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+
+                    // Creates an extra piece with the bounding box
+                    Vector2Int boundingX = new Vector2Int(images[k][0], images[k][1]);
+                    Vector2Int boundingY = new Vector2Int(images[k][2], images[k][3]);
+                    PuzzlePiece bounding = new PuzzlePiece(boundingX, boundingY);
+
+                    double delta = imgs[n].ImageAngle(bottomRight);
+                    Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, bounding, (float)(delta * Math.PI / 180));
+                }
+                else
+                {
+                    top = new Vector2Int(images[k][0], images[k][1]);
+                    bot = new Vector2Int(images[k][2], images[k][3]);
+                    imgs[n] = new PuzzlePiece(top.Value, bot.Value);
+                }
+                n++;
             }
-            // Checks if the pixel being checked is equal to the background
+            // Think this should be a && operator, in it's current state if it has the
+            // same red, blue or green, will assume it's background when it's not
+            // still would be a big coincidence.
+            // Note: japanese temple was giving problems cuz of this
             bool IsPixelBackGroundColor(int x, int y)
             {
                 return (
@@ -1661,75 +1714,6 @@ namespace CG_OpenCV
             }
         }
 
-        private static unsafe void FindRotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece[] images)
-        {
-            for (int i = 0; i < images.Length; i++)
-            {
-                if (IsPixelBackGroundColor(images[i].Top.x , images[i].Top.y))
-                {
-                    Vector2Int bottom = new Vector2Int();
-                    // This only works for images rotated counter clockwise
-                    for (int x = images[i].Top.x; x <= images[i].Bottom.x; x++)
-                    {
-                        if (!IsPixelBackGroundColor(x, images[i].Bottom.y))
-                        {
-                            bottom = new Vector2Int(x, images[i].Bottom.y);
-                            break;
-                        }
-                    }
-                    Vector2Int bottomRight = new Vector2Int();
-
-                    for (int y = images[i].Top.y; y <= images[i].Bottom.y; y++)
-                    {
-                        if (!IsPixelBackGroundColor(images[i].Bottom.x, y))
-                        {
-                            bottomRight = new Vector2Int(images[i].Bottom.x, y - 1);
-                            break;
-                        }
-                    }
-
-                    double delta = PuzzlePiece.ImageAngle(bottomRight, bottom);
-                    Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, images[i], (delta * Math.PI / 180.0));
-
-                    Vector2Int newBoundTop;
-                    Vector2Int newBoundBottom;
-
-                    int newXBound = 0;
-                    int newYBound = 0;
-
-                    for (int nY = images[i].Top.y; nY < images[i].Bottom.y; nY++)
-                    {
-                        if (!IsPixelBackGroundColor(images[i].Top.x + (int)(images[i].Width / 2f), nY))
-                        {
-                            newYBound = nY + 1;
-                            break;
-                        }
-                    }
-                    for (int nX = images[i].Top.x; nX < images[i].Bottom.x; nX++)
-                    {
-                        if (!IsPixelBackGroundColor(nX, images[i].Top.y + (int)(images[i].Height / 2f)))
-                        {
-                            newXBound = nX + 1;
-                            break;
-                        }
-                    }
-                    //newBoundTop = new Vector2Int(newXBound, newYBound);
-                    //newBoundBottom = new Vector2Int(
-                    //    images[i].Bottom.x - Math.Abs(images[i].Top.x - newXBound),
-                    //    images[i].Bottom.y - Math.Abs(images[i].Top.y - newYBound));
-
-                    //images[i] = new PuzzlePiece(newBoundTop, newBoundBottom);
-                }
-            }
-            bool IsPixelBackGroundColor(int x, int y)
-            {
-                return (
-                    (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
-            }
-        }
-
         /// <summary>
         /// Function that solves the puzzle
         /// </summary>
@@ -1758,7 +1742,6 @@ namespace CG_OpenCV
                 int widthStep = mUndo.widthStep;
 
                 PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, heigh);
-                FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
                 DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
 
                 backgroundColor.Red = dataPtrRead[0];
