@@ -50,14 +50,14 @@
             this.brightnessContrastToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoZoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.binarizationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blackWhiteTresholdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blackWhiteOtsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.randomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PuzzleSolverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.evalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.ImageViewer = new System.Windows.Forms.PictureBox();
-            this.blackWhiteTresholdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.blackWhiteOtsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ImageViewer)).BeginInit();
@@ -143,7 +143,7 @@
             this.autoZoomToolStripMenuItem,
             this.binarizationToolStripMenuItem,
             this.histogramToolStripMenuItem,
-            this.randomToolStripMenuItem});
+            this.PuzzleSolverToolStripMenuItem});
             this.imageToolStripMenuItem.Name = "imageToolStripMenuItem";
             this.imageToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.imageToolStripMenuItem.Text = "Image";
@@ -160,14 +160,14 @@
             // negativeToolStripMenuItem
             // 
             this.negativeToolStripMenuItem.Name = "negativeToolStripMenuItem";
-            this.negativeToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.negativeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.negativeToolStripMenuItem.Text = "Negative";
             this.negativeToolStripMenuItem.Click += new System.EventHandler(this.negativeToolStripMenuItem_Click);
             // 
             // grayToolStripMenuItem
             // 
             this.grayToolStripMenuItem.Name = "grayToolStripMenuItem";
-            this.grayToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.grayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.grayToolStripMenuItem.Text = "Gray";
             this.grayToolStripMenuItem.Click += new System.EventHandler(this.grayToolStripMenuItem_Click);
             // 
@@ -234,6 +234,20 @@
             this.binarizationToolStripMenuItem.Text = "Binarilization";
             this.binarizationToolStripMenuItem.Click += new System.EventHandler(this.binarizationToolStripMenuItem_Click);
             // 
+            // blackWhiteTresholdToolStripMenuItem
+            // 
+            this.blackWhiteTresholdToolStripMenuItem.Name = "blackWhiteTresholdToolStripMenuItem";
+            this.blackWhiteTresholdToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.blackWhiteTresholdToolStripMenuItem.Text = "Black&White Treshold";
+            this.blackWhiteTresholdToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteTresholdToolStripMenuItem_Click);
+            // 
+            // blackWhiteOtsuToolStripMenuItem
+            // 
+            this.blackWhiteOtsuToolStripMenuItem.Name = "blackWhiteOtsuToolStripMenuItem";
+            this.blackWhiteOtsuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.blackWhiteOtsuToolStripMenuItem.Text = "Black&White Otsu";
+            this.blackWhiteOtsuToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteOtsuToolStripMenuItem_Click);
+            // 
             // histogramToolStripMenuItem
             // 
             this.histogramToolStripMenuItem.Name = "histogramToolStripMenuItem";
@@ -241,12 +255,12 @@
             this.histogramToolStripMenuItem.Text = "Histogram";
             this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
             // 
-            // randomToolStripMenuItem
+            // PuzzleSolverToolStripMenuItem
             // 
-            this.randomToolStripMenuItem.Name = "randomToolStripMenuItem";
-            this.randomToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.randomToolStripMenuItem.Text = "random";
-            this.randomToolStripMenuItem.Click += new System.EventHandler(this.randomToolStripMenuItem_Click);
+            this.PuzzleSolverToolStripMenuItem.Name = "PuzzleSolverToolStripMenuItem";
+            this.PuzzleSolverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.PuzzleSolverToolStripMenuItem.Text = "PuzzleSolver";
+            this.PuzzleSolverToolStripMenuItem.Click += new System.EventHandler(this.PuzzleSolverToolStripMenuItem_Click);
             // 
             // autoresToolStripMenuItem
             // 
@@ -271,6 +285,7 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(770, 500);
             this.panel1.TabIndex = 6;
+            this.panel1.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.zoomInImage);
             // 
             // ImageViewer
             // 
@@ -280,20 +295,6 @@
             this.ImageViewer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.ImageViewer.TabIndex = 6;
             this.ImageViewer.TabStop = false;
-            // 
-            // blackWhiteTresholdToolStripMenuItem
-            // 
-            this.blackWhiteTresholdToolStripMenuItem.Name = "blackWhiteTresholdToolStripMenuItem";
-            this.blackWhiteTresholdToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.blackWhiteTresholdToolStripMenuItem.Text = "Black&White Treshold";
-            this.blackWhiteTresholdToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteTresholdToolStripMenuItem_Click);
-            // 
-            // blackWhiteOtsuToolStripMenuItem
-            // 
-            this.blackWhiteOtsuToolStripMenuItem.Name = "blackWhiteOtsuToolStripMenuItem";
-            this.blackWhiteOtsuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.blackWhiteOtsuToolStripMenuItem.Text = "Black&White Otsu";
-            this.blackWhiteOtsuToolStripMenuItem.Click += new System.EventHandler(this.blackWhiteOtsuToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -344,7 +345,7 @@
         private System.Windows.Forms.ToolStripMenuItem brightnessContrastToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem binarizationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem histogramToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem randomToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem PuzzleSolverToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blackWhiteTresholdToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blackWhiteOtsuToolStripMenuItem;
     }

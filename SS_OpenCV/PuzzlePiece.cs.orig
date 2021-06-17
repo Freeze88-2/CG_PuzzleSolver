@@ -23,7 +23,6 @@ namespace CG_OpenCV
         private int height;
         private int width;
 
-        public double Angle { get; }
         public Vector2Int Top => top;
         public Vector2Int Bottom => bottom;
         public int Height => height;
@@ -34,7 +33,13 @@ namespace CG_OpenCV
         // WARNING: add the rest of the variables for side comparison
         private float leftDistance, rightDistance, topDistance, botDistance;
 
-        public PuzzlePiece(Vector2Int top, Vector2Int bottom, double angle = 0, bool merged = false)
+<<<<<<< HEAD
+        private float compareTreshold;
+
+        public PuzzlePiece(Vector2Int top, Vector2Int bottom)
+=======
+        public PuzzlePiece(Vector2Int top, Vector2Int bottom, bool merged = false)
+>>>>>>> 10db84e69248425863744ad8d74fa96855e87aff
         {
             this.top = top;
             this.bottom = bottom;
@@ -44,11 +49,14 @@ namespace CG_OpenCV
 
             leftDistance = rightDistance = topDistance = botDistance = 0;
             MergedPiece = merged;
-            Angle = angle;
         }
 
-        public PuzzlePiece(Vector2Int top, Vector2Int bottom,
+<<<<<<< HEAD
+        public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
+=======
+        public PuzzlePiece(Vector2Int top, Vector2Int bottom, 
                 float leftDistance, float rightDistance, float topDistance, float botDistance)
+>>>>>>> 10db84e69248425863744ad8d74fa96855e87aff
         {
             this.top = top;
             this.bottom = bottom;
@@ -58,11 +66,17 @@ namespace CG_OpenCV
 
             this.leftDistance = leftDistance;
             this.rightDistance = rightDistance;
-            this.topDistance = topDistance;
+            this.topDistance = topDistance; 
             this.botDistance = botDistance;
             MergedPiece = true;
         }
 
+<<<<<<< HEAD
+        // Sides comparison functions
+        // ETC...
+
+        public float CompareSide(PuzzlePiece other, Side side)
+=======
         /// <summary>
         /// Connects this piece to a given puzzle piece by side,
         /// Connected piece is written into a temporary texture of connected pieces
@@ -71,6 +85,7 @@ namespace CG_OpenCV
         /// <param name="side"></param>
         /// <returns></returns>
         public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side, byte* read, byte* write, int widthStep)
+>>>>>>> 10db84e69248425863744ad8d74fa96855e87aff
         {
             // Side references to this piece and not other.
             // if side == top then combine with bottom of other
@@ -79,7 +94,7 @@ namespace CG_OpenCV
 
             Vector2Int newTop = Vector2Int.Zero;
             Vector2Int newBottom = Vector2Int.Zero;
-
+            
             // Create new piece
             switch (side)
             {
@@ -136,10 +151,14 @@ namespace CG_OpenCV
                     break;
                     // newPiece.CalculateSideAverage();
             }
+<<<<<<< HEAD
+            return 0;
+=======
 
             ImageClass.Translation(read, write, 3, widthStep, other, translationX, translationY);
             return new PuzzlePiece(newTop, newBottom, leftDistance, rightDistance, topDistance, botDistance);
         }
+
 
         public unsafe void CalculateSideAverage(byte* dataPtrRead, int widthStep)
         {
@@ -162,14 +181,14 @@ namespace CG_OpenCV
             }
         }
 
-        public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
+        public double ImageAngle(Vector2Int rightBottom)
         {
-            Vector2Int diagonal = rightBottom - bottom;
+            Vector2Int diagonal2 = rightBottom - bottom;
 
-            double r = Math.Atan2(diagonal.y, diagonal.x);
-            double angle = r * 180.0 / Math.PI;
+            double r2 = Math.Atan2(diagonal2.y, diagonal2.x);
+            double angle2 = r2 * 180.0 / Math.PI;
 
-            return -angle;
+            return -angle2;
         }
 
         // Sides comparison functions
@@ -187,15 +206,12 @@ namespace CG_OpenCV
                     case Side.Top:
                         dist = Math.Abs(topDistance - others[i].botDistance);
                         break;
-
                     case Side.Right:
                         dist = Math.Abs(rightDistance - others[i].leftDistance);
                         break;
-
                     case Side.Bottom:
                         dist = Math.Abs(botDistance - others[i].topDistance);
                         break;
-
                     case Side.Left:
                         dist = Math.Abs(leftDistance - others[i].rightDistance);
                         break;
@@ -209,6 +225,7 @@ namespace CG_OpenCV
             }
 
             return others[minIndex];
+>>>>>>> 10db84e69248425863744ad8d74fa96855e87aff
         }
     }
 

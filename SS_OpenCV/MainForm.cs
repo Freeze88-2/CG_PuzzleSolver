@@ -289,7 +289,7 @@ namespace CG_OpenCV
             Cursor = Cursors.Default;
         }
 
-        private void randomToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PuzzleSolverToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (img == null) // verify if the image is already opened
             {
@@ -300,9 +300,9 @@ namespace CG_OpenCV
             //copy Undo Image
             imgUndo = img.Copy();
 
-            ImageClass.puzzle(img, imgUndo, out List<int[]> positions, out List<int> angles, 0);
+            Image<Bgr, byte> m = ImageClass.puzzle(img, imgUndo, out List<int[]> positions, out List<int> angles, 0);
 
-            ImageViewer.Image = img.Bitmap;
+            ImageViewer.Image = m.Bitmap;
             ImageViewer.Refresh(); // refresh image on the screen
 
             Cursor = Cursors.Default;
@@ -358,6 +358,20 @@ namespace CG_OpenCV
             ImageViewer.Refresh();
 
             Cursor = Cursors.Default;
+        }
+
+        /// <summary>
+        /// Change visualization mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void zoomInImage(object sender, MouseEventArgs e)
+        {
+            int nSteps = e.Delta * SystemInformation.MouseWheelScrollLines / 60;
+
+            ImageViewer.SizeMode = PictureBoxSizeMode.Zoom;
+            ImageViewer.Size = new System.Drawing.Size(ImageViewer.Size.Width + nSteps, ImageViewer.Size.Height + nSteps);
+            ImageViewer.Dock = DockStyle.None;
         }
     }
 }

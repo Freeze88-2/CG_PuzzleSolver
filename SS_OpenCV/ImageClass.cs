@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace CG_OpenCV
@@ -104,20 +105,20 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
                 byte red, green, blue;
                 int x0, y0;
 
-                for (int y = 0; y < heigh; y++)
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         x0 = x - dx;
                         y0 = y - dy;
 
-                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < heigh)
+                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height)
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -153,20 +154,20 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
                 byte red, green, blue;
                 int x0, y0;
 
-                for (int y = 0; y < heigh; y++)
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         x0 = (int)Math.Round(x / scaleFactor);
                         y0 = (int)Math.Round(y / scaleFactor);
 
-                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < heigh)
+                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height)
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -202,20 +203,20 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
                 byte red, green, blue;
                 int x0, y0;
 
-                for (int y = 0; y < heigh; y++)
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         x0 = (int)Math.Round(((x - width / 2) / scaleFactor) + centerX);
-                        y0 = (int)Math.Round(((y - heigh / 2) / scaleFactor) + centerY);
+                        y0 = (int)Math.Round(((y - height / 2) / scaleFactor) + centerY);
 
-                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < heigh)
+                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height)
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -251,7 +252,7 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
@@ -300,52 +301,52 @@ namespace CG_OpenCV
                         ((dataPtrRead + nChan + widthStep)[2] * matrix[2, 2]))
                         / matrixWeight), 0), 255);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[0] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[0] =
                    (byte)Math.Min(Math.Max(Math.Round((
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0] * matrix[2, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0] * matrix[2, 1]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0] * matrix[1, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0] * matrix[1, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0] * matrix[2, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0] * matrix[2, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0] * matrix[1, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0] * matrix[1, 1]) +
 
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[0] * matrix[1, 0]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[0] * matrix[2, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[0] * matrix[1, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[0] * matrix[2, 0]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[0] * matrix[0, 1]) +
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[0] * matrix[0, 2]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[0] * matrix[0, 1]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[0] * matrix[0, 2]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[0] * matrix[0, 0]))
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[0] * matrix[0, 0]))
                         / matrixWeight), 0), 255);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[1] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[1] =
                    (byte)Math.Min(Math.Max(Math.Round((
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1] * matrix[2, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1] * matrix[2, 1]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1] * matrix[1, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1] * matrix[1, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1] * matrix[2, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1] * matrix[2, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1] * matrix[1, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1] * matrix[1, 1]) +
 
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[1] * matrix[1, 0]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[1] * matrix[2, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[1] * matrix[1, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[1] * matrix[2, 0]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[1] * matrix[0, 1]) +
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[1] * matrix[0, 2]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[1] * matrix[0, 1]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[1] * matrix[0, 2]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[1] * matrix[0, 0]))
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[1] * matrix[0, 0]))
                         / matrixWeight), 0), 255);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[2] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[2] =
                     (byte)Math.Min(Math.Max(Math.Round((
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2] * matrix[2, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2] * matrix[2, 1]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2] * matrix[1, 2]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2] * matrix[1, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2] * matrix[2, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2] * matrix[2, 1]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2] * matrix[1, 2]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2] * matrix[1, 1]) +
 
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[2] * matrix[1, 0]) +
-                        ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[2] * matrix[2, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[2] * matrix[1, 0]) +
+                        ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[2] * matrix[2, 0]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[2] * matrix[0, 1]) +
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[2] * matrix[0, 2]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[2] * matrix[0, 1]) +
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[2] * matrix[0, 2]) +
 
-                        ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[2] * matrix[0, 0]))
+                        ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[2] * matrix[0, 0]))
                         / matrixWeight), 0), 255);
 
                 (dataPtrWrite + nChan * (width - 1))[0] = (byte)Math.Min(Math.Max(Math.Round((
@@ -393,49 +394,49 @@ namespace CG_OpenCV
                     ((dataPtrRead + nChan * (width - 3) + widthStep)[2] * matrix[0, 2]))
                     / matrixWeight), 0), 255);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[0] = (byte)Math.Min(Math.Max(Math.Round((
-                    ((dataPtrRead + widthStep * (heigh - 1))[0] * matrix[0, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[0] * matrix[0, 1]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[0] * matrix[1, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[0] * matrix[1, 1]) +
+                (dataPtrWrite + widthStep * (height - 1))[0] = (byte)Math.Min(Math.Max(Math.Round((
+                    ((dataPtrRead + widthStep * (height - 1))[0] * matrix[0, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[0] * matrix[0, 1]) +
+                    ((dataPtrRead + widthStep * (height - 1))[0] * matrix[1, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[0] * matrix[1, 1]) +
 
-                    ((dataPtrRead + widthStep * (heigh - 2))[0] * matrix[0, 0]) +
-                    ((dataPtrRead + widthStep * (heigh - 2))[0] * matrix[1, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[0] * matrix[0, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[0] * matrix[1, 0]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[0] * matrix[2, 2]) +
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[0] * matrix[2, 1]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[0] * matrix[2, 2]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[0] * matrix[2, 1]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 2))[0] * matrix[2, 0]))
+                    ((dataPtrRead + nChan + widthStep * (height - 2))[0] * matrix[2, 0]))
                     / matrixWeight), 0), 255);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[1] = (byte)Math.Min(Math.Max(Math.Round((
-                    ((dataPtrRead + widthStep * (heigh - 1))[1] * matrix[0, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[1] * matrix[0, 1]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[1] * matrix[1, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[1] * matrix[1, 1]) +
+                (dataPtrWrite + widthStep * (height - 1))[1] = (byte)Math.Min(Math.Max(Math.Round((
+                    ((dataPtrRead + widthStep * (height - 1))[1] * matrix[0, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[1] * matrix[0, 1]) +
+                    ((dataPtrRead + widthStep * (height - 1))[1] * matrix[1, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[1] * matrix[1, 1]) +
 
-                    ((dataPtrRead + widthStep * (heigh - 2))[1] * matrix[0, 0]) +
-                    ((dataPtrRead + widthStep * (heigh - 2))[1] * matrix[1, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[1] * matrix[0, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[1] * matrix[1, 0]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[1] * matrix[2, 2]) +
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[1] * matrix[2, 1]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[1] * matrix[2, 2]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[1] * matrix[2, 1]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 2))[1] * matrix[2, 0]))
+                    ((dataPtrRead + nChan + widthStep * (height - 2))[1] * matrix[2, 0]))
                     / matrixWeight), 0), 255);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[2] = (byte)Math.Min(Math.Max(Math.Round((
-                    ((dataPtrRead + widthStep * (heigh - 1))[2] * matrix[0, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[2] * matrix[0, 1]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[2] * matrix[1, 2]) +
-                    ((dataPtrRead + widthStep * (heigh - 1))[2] * matrix[1, 1]) +
+                (dataPtrWrite + widthStep * (height - 1))[2] = (byte)Math.Min(Math.Max(Math.Round((
+                    ((dataPtrRead + widthStep * (height - 1))[2] * matrix[0, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[2] * matrix[0, 1]) +
+                    ((dataPtrRead + widthStep * (height - 1))[2] * matrix[1, 2]) +
+                    ((dataPtrRead + widthStep * (height - 1))[2] * matrix[1, 1]) +
 
-                    ((dataPtrRead + widthStep * (heigh - 2))[2] * matrix[0, 0]) +
-                    ((dataPtrRead + widthStep * (heigh - 2))[2] * matrix[1, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[2] * matrix[0, 0]) +
+                    ((dataPtrRead + widthStep * (height - 2))[2] * matrix[1, 0]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[2] * matrix[2, 2]) +
-                    ((dataPtrRead + nChan + widthStep * (heigh - 1))[2] * matrix[2, 1]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[2] * matrix[2, 2]) +
+                    ((dataPtrRead + nChan + widthStep * (height - 1))[2] * matrix[2, 1]) +
 
-                    ((dataPtrRead + nChan + widthStep * (heigh - 2))[2] * matrix[2, 0]))
+                    ((dataPtrRead + nChan + widthStep * (height - 2))[2] * matrix[2, 0]))
                     / matrixWeight), 0), 255);
 
                 for (int x = 1; x < width - 1; x++)
@@ -452,19 +453,19 @@ namespace CG_OpenCV
                                                            ((dataPtrRead + nChan * (x - 1))[2] * matrix[0, 1]) + ((dataPtrRead + nChan * x)[2] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1))[2] * matrix[2, 1]) +
                                                            ((dataPtrRead + nChan * (x - 1) + widthStep * 1)[2] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * 1)[2] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * 1)[2] * matrix[2, 2])) / matrixWeight), 0), 255);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[0] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[0] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0] * matrix[2, 2]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[0] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0] * matrix[2, 1]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[0] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 2))[0] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[0] * matrix[2, 0])) / matrixWeight), 0), 255);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[0] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[0] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0] * matrix[2, 2]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[0] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0] * matrix[2, 1]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[0] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (height - 2))[0] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[0] * matrix[2, 0])) / matrixWeight), 0), 255);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[1] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[1] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1] * matrix[2, 2]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[1] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1] * matrix[2, 1]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[1] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 2))[1] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[1] * matrix[2, 0])) / matrixWeight), 0), 255);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[1] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[1] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1] * matrix[2, 2]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[1] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1] * matrix[2, 1]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[1] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (height - 2))[1] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[1] * matrix[2, 0])) / matrixWeight), 0), 255);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[2] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[2] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2] * matrix[2, 2]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 1))[2] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2] * matrix[2, 1]) +
-                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[2] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (heigh - 2))[2] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[2] * matrix[2, 0])) / matrixWeight), 0), 255);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[2] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2] * matrix[0, 2]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[2] * matrix[1, 2]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2] * matrix[2, 2]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2] * matrix[0, 1]) + ((dataPtrRead + nChan * x + widthStep * (height - 1))[2] * matrix[1, 1]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2] * matrix[2, 1]) +
+                                                                                     ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[2] * matrix[0, 0]) + ((dataPtrRead + nChan * x + widthStep * (height - 2))[2] * matrix[1, 0]) + ((dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[2] * matrix[2, 0])) / matrixWeight), 0), 255);
                 }
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     (dataPtrWrite + widthStep * y)[0] = (byte)Math.Min(Math.Max(Math.Round((((dataPtrRead + widthStep * (y - 1))[0] * matrix[0, 0]) + ((dataPtrRead + widthStep * (y - 1))[0] * matrix[1, 0]) + ((dataPtrRead + nChan + widthStep * (y - 1))[0] * matrix[2, 0]) +
                                                                                              ((dataPtrRead + widthStep * (y))[0] * matrix[0, 1]) + ((dataPtrRead + widthStep * (y))[0] * matrix[1, 1]) + ((dataPtrRead + nChan + widthStep * (y))[0] * matrix[2, 1]) +
@@ -491,7 +492,7 @@ namespace CG_OpenCV
                                                                                                                    ((dataPtrRead + nChan * (width - 1) + widthStep * (y + 1))[2] * matrix[2, 2]) + ((dataPtrRead + nChan * (width - 1) + widthStep * (y + 1))[2] * matrix[1, 2]) + ((dataPtrRead + nChan * (width - 3) + nChan + widthStep * (y + 1))[2] * matrix[0, 2])) / matrixWeight), 0), 255);
                 }
 
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     for (int x = 1; x < width - 1; x++)
                     {
@@ -526,7 +527,7 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
@@ -548,26 +549,26 @@ namespace CG_OpenCV
                     2 * (dataPtrRead + widthStep)[2] +
                     (dataPtrRead + nChan + widthStep)[2]) / 9.0);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[0] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[0] =
                     (byte)Math.Round(
-                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0] +
-                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[0] +
-                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[0] +
-                        (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[0]) / 9.0);
+                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0] +
+                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[0] +
+                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[0] +
+                        (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[0]) / 9.0);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[1] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[1] =
                     (byte)Math.Round(
-                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1] +
-                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[1] +
-                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[1] +
-                        (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[1]) / 9.0);
+                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1] +
+                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[1] +
+                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[1] +
+                        (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[1]) / 9.0);
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[2] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[2] =
                     (byte)Math.Round(
-                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2] +
-                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[2] +
-                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[2] +
-                        (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[2]) / 9.0);
+                        (4 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2] +
+                        2 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[2] +
+                        2 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[2] +
+                        (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[2]) / 9.0);
 
                 (dataPtrWrite + nChan * (width - 1))[0] = (byte)Math.Round(
                     (4 * (dataPtrRead + nChan * (width - 1))[0] +
@@ -589,9 +590,9 @@ namespace CG_OpenCV
                         2 * (dataPtrRead + nChan * (width - 1) + widthStep)[2]
                         + (dataPtrRead + nChan * (width - 2) + widthStep)[2]) / 9.0);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[0] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (heigh - 1))[0] + 2 * (dataPtrRead + widthStep * (heigh - 2))[0] + 2 * (dataPtrRead + nChan + widthStep * (heigh - 1))[0] + (dataPtrRead + nChan + widthStep * (heigh - 2))[0]) / 9.0);
-                (dataPtrWrite + widthStep * (heigh - 1))[1] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (heigh - 1))[1] + 2 * (dataPtrRead + widthStep * (heigh - 2))[1] + 2 * (dataPtrRead + nChan + widthStep * (heigh - 1))[1] + (dataPtrRead + nChan + widthStep * (heigh - 2))[1]) / 9.0);
-                (dataPtrWrite + widthStep * (heigh - 1))[2] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (heigh - 1))[2] + 2 * (dataPtrRead + widthStep * (heigh - 2))[2] + 2 * (dataPtrRead + nChan + widthStep * (heigh - 1))[2] + (dataPtrRead + nChan + widthStep * (heigh - 2))[2]) / 9.0);
+                (dataPtrWrite + widthStep * (height - 1))[0] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (height - 1))[0] + 2 * (dataPtrRead + widthStep * (height - 2))[0] + 2 * (dataPtrRead + nChan + widthStep * (height - 1))[0] + (dataPtrRead + nChan + widthStep * (height - 2))[0]) / 9.0);
+                (dataPtrWrite + widthStep * (height - 1))[1] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (height - 1))[1] + 2 * (dataPtrRead + widthStep * (height - 2))[1] + 2 * (dataPtrRead + nChan + widthStep * (height - 1))[1] + (dataPtrRead + nChan + widthStep * (height - 2))[1]) / 9.0);
+                (dataPtrWrite + widthStep * (height - 1))[2] = (byte)Math.Round((4 * (dataPtrRead + widthStep * (height - 1))[2] + 2 * (dataPtrRead + widthStep * (height - 2))[2] + 2 * (dataPtrRead + nChan + widthStep * (height - 1))[2] + (dataPtrRead + nChan + widthStep * (height - 2))[2]) / 9.0);
 
                 for (int x = 1; x < width - 1; x++)
                 {
@@ -607,19 +608,19 @@ namespace CG_OpenCV
                                                        (dataPtrRead + nChan * (x - 1))[2] + (dataPtrRead + nChan * x)[2] + (dataPtrRead + nChan * (x + 1))[2] +
                                                        (dataPtrRead + nChan * (x - 1) + widthStep * 1)[2] + (dataPtrRead + nChan * x + widthStep * 1)[2] + (dataPtrRead + nChan * (x + 1) + widthStep * 1)[2]) / 9.0);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[0] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[0] + (dataPtrRead + nChan * x + widthStep * (heigh - 2))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[0]) / 9.0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[0] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0] + (dataPtrRead + nChan * x + widthStep * (height - 1))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0] + (dataPtrRead + nChan * x + widthStep * (height - 1))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[0] + (dataPtrRead + nChan * x + widthStep * (height - 2))[0] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[0]) / 9.0);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[1] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[1] + (dataPtrRead + nChan * x + widthStep * (heigh - 2))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[1]) / 9.0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[1] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1] + (dataPtrRead + nChan * x + widthStep * (height - 1))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1] + (dataPtrRead + nChan * x + widthStep * (height - 1))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[1] + (dataPtrRead + nChan * x + widthStep * (height - 2))[1] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[1]) / 9.0);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[2] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2] + (dataPtrRead + nChan * x + widthStep * (heigh - 1))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2] +
-                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[2] + (dataPtrRead + nChan * x + widthStep * (heigh - 2))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[2]) / 9.0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[2] = (byte)Math.Round(((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2] + (dataPtrRead + nChan * x + widthStep * (height - 1))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2] + (dataPtrRead + nChan * x + widthStep * (height - 1))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2] +
+                                                                                 (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[2] + (dataPtrRead + nChan * x + widthStep * (height - 2))[2] + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[2]) / 9.0);
                 }
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     (dataPtrWrite + widthStep * y)[0] = (byte)Math.Round(((dataPtrRead + widthStep * (y - 1))[0] + (dataPtrRead + widthStep * (y - 1))[0] + (dataPtrRead + nChan + widthStep * (y - 1))[0] +
                                                            (dataPtrRead + widthStep * (y))[0] + (dataPtrRead + widthStep * (y))[0] + (dataPtrRead + nChan + widthStep * (y))[0] +
@@ -646,7 +647,7 @@ namespace CG_OpenCV
                                                                                                       (dataPtrRead + nChan * (width - 1) + widthStep * (y + 1))[2] + (dataPtrRead + nChan * (width - 1) + widthStep * (y + 1))[2] + (dataPtrRead + nChan * (width - 2) + widthStep * (y + 1))[2]) / 9.0);
                 }
 
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     for (int x = 1; x < width - 1; x++)
                     {
@@ -681,16 +682,16 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
                 byte red, green, blue;
                 int x0, y0;
 
                 double W = width / 2f;
-                double H = heigh / 2f;
+                double H = height / 2f;
 
-                for (int y = 0; y < heigh; y++)
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -700,7 +701,7 @@ namespace CG_OpenCV
                         x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                         y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
 
-                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < heigh)
+                        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height)
                         {
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -788,13 +789,13 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
                 double[,] distsTotal = new double[3, 3];
 
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     for (int x = 1; x < width - 1; x++)
                     {
@@ -903,7 +904,7 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
@@ -933,31 +934,31 @@ namespace CG_OpenCV
                 (dataPtrWrite)[2] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
                 // Bottom right
-                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[0] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[0])) -
-                     ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[0] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0]));
+                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[0] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[0])) -
+                     ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[0] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0]));
 
-                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[0]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[0])) -
-                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[0]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[0]));
+                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[0]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[0])) -
+                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[0]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[0]));
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[0] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[0] =
                    (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
-                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[1] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[1])) -
-                     ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[1] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1]));
+                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[1] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[1])) -
+                     ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[1] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1]));
 
-                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[1]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[1])) -
-                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[1]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[1]));
+                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[1]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[1])) -
+                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[1]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[1]));
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[1] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[1] =
                    (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
-                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[2] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[2])) -
-                     ((dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[2] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2]));
+                Sx = ((dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[2] + (3 * (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[2])) -
+                     ((dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[2] + (3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2]));
 
-                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 1))[2]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 1))[2])) -
-                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (heigh - 2))[2]) + (dataPtrRead + nChan * (width - 2) + widthStep * (heigh - 2))[2]));
+                Sy = (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 1))[2]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 1))[2])) -
+                     (((3 * (dataPtrRead + nChan * (width - 1) + widthStep * (height - 2))[2]) + (dataPtrRead + nChan * (width - 2) + widthStep * (height - 2))[2]));
 
-                (dataPtrWrite + nChan * (width - 1) + widthStep * (heigh - 1))[2] =
+                (dataPtrWrite + nChan * (width - 1) + widthStep * (height - 1))[2] =
                    (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
                 // Top Right
@@ -986,29 +987,29 @@ namespace CG_OpenCV
                 (dataPtrWrite + nChan * (width - 1))[2] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
                 // Bottom Left
-                Sx = ((dataPtrRead + widthStep * (heigh - 2))[0] + (3 * (dataPtrRead + widthStep * (heigh - 1))[0])) -
-                     ((dataPtrRead + nChan + widthStep * (heigh - 2))[0] + (3 * (dataPtrRead + nChan + widthStep * (heigh - 1))[0]));
+                Sx = ((dataPtrRead + widthStep * (height - 2))[0] + (3 * (dataPtrRead + widthStep * (height - 1))[0])) -
+                     ((dataPtrRead + nChan + widthStep * (height - 2))[0] + (3 * (dataPtrRead + nChan + widthStep * (height - 1))[0]));
 
-                Sy = ((3 * (dataPtrRead + widthStep * (heigh - 1))[0]) + (dataPtrRead + nChan + widthStep * (heigh - 1))[0]) -
-                     ((3 * (dataPtrRead + widthStep * (heigh - 2))[0]) + (dataPtrRead + nChan + widthStep * (heigh - 2))[0]);
+                Sy = ((3 * (dataPtrRead + widthStep * (height - 1))[0]) + (dataPtrRead + nChan + widthStep * (height - 1))[0]) -
+                     ((3 * (dataPtrRead + widthStep * (height - 2))[0]) + (dataPtrRead + nChan + widthStep * (height - 2))[0]);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[0] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
+                (dataPtrWrite + widthStep * (height - 1))[0] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
-                Sx = ((dataPtrRead + widthStep * (heigh - 2))[1] + (3 * (dataPtrRead + widthStep * (heigh - 1))[1])) -
-                     ((dataPtrRead + nChan + widthStep * (heigh - 2))[1] + (3 * (dataPtrRead + nChan + widthStep * (heigh - 1))[1]));
+                Sx = ((dataPtrRead + widthStep * (height - 2))[1] + (3 * (dataPtrRead + widthStep * (height - 1))[1])) -
+                     ((dataPtrRead + nChan + widthStep * (height - 2))[1] + (3 * (dataPtrRead + nChan + widthStep * (height - 1))[1]));
 
-                Sy = ((3 * (dataPtrRead + widthStep * (heigh - 1))[1]) + (dataPtrRead + nChan + widthStep * (heigh - 1))[1]) -
-                     ((3 * (dataPtrRead + widthStep * (heigh - 2))[1]) + (dataPtrRead + nChan + widthStep * (heigh - 2))[1]);
+                Sy = ((3 * (dataPtrRead + widthStep * (height - 1))[1]) + (dataPtrRead + nChan + widthStep * (height - 1))[1]) -
+                     ((3 * (dataPtrRead + widthStep * (height - 2))[1]) + (dataPtrRead + nChan + widthStep * (height - 2))[1]);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[1] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
+                (dataPtrWrite + widthStep * (height - 1))[1] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
-                Sx = ((dataPtrRead + widthStep * (heigh - 2))[2] + (3 * (dataPtrRead + widthStep * (heigh - 1))[2])) -
-                     ((dataPtrRead + nChan + widthStep * (heigh - 2))[2] + (3 * (dataPtrRead + nChan + widthStep * (heigh - 1))[2]));
+                Sx = ((dataPtrRead + widthStep * (height - 2))[2] + (3 * (dataPtrRead + widthStep * (height - 1))[2])) -
+                     ((dataPtrRead + nChan + widthStep * (height - 2))[2] + (3 * (dataPtrRead + nChan + widthStep * (height - 1))[2]));
 
-                Sy = ((3 * (dataPtrRead + widthStep * (heigh - 1))[2]) + (dataPtrRead + nChan + widthStep * (heigh - 1))[2]) -
-                     ((3 * (dataPtrRead + widthStep * (heigh - 2))[2]) + (dataPtrRead + nChan + widthStep * (heigh - 2))[2]);
+                Sy = ((3 * (dataPtrRead + widthStep * (height - 1))[2]) + (dataPtrRead + nChan + widthStep * (height - 1))[2]) -
+                     ((3 * (dataPtrRead + widthStep * (height - 2))[2]) + (dataPtrRead + nChan + widthStep * (height - 2))[2]);
 
-                (dataPtrWrite + widthStep * (heigh - 1))[2] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
+                (dataPtrWrite + widthStep * (height - 1))[2] = (byte)Math.Min(Math.Max(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 0), 255);
 
                 for (int x = 1; x < width - 1; x++)
                 {
@@ -1038,31 +1039,31 @@ namespace CG_OpenCV
                     (dataPtrWrite + nChan * x)[2] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
 
                     // Bottom
-                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0]) + (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[0]) -
-                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[0]);
+                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0]) + (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[0]) -
+                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[0]);
 
-                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[0] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 1))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[0]) -
-                         ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[0] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 2))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[0]);
+                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[0] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 1))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[0]) -
+                         ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[0] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 2))[0]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[0]);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[0] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[0] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
 
-                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1]) + (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[1]) -
-                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[1]);
+                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1]) + (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[1]) -
+                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[1]);
 
-                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[1] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 1))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[1]) -
-                         ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[1] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 2))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[1]);
+                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[1] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 1))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[1]) -
+                         ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[1] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 2))[1]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[1]);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[1] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[1] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
 
-                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2]) + (dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[2]) -
-                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[2]);
+                    Sx = ((3 * (dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2]) + (dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[2]) -
+                         ((3 * (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[2]);
 
-                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 1))[2] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 1))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 1))[2]) -
-                         ((dataPtrRead + nChan * (x - 1) + widthStep * (heigh - 2))[2] + (2 * (dataPtrRead + nChan * x + widthStep * (heigh - 2))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (heigh - 2))[2]);
+                    Sy = ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 1))[2] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 1))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 1))[2]) -
+                         ((dataPtrRead + nChan * (x - 1) + widthStep * (height - 2))[2] + (2 * (dataPtrRead + nChan * x + widthStep * (height - 2))[2]) + (dataPtrRead + nChan * (x + 1) + widthStep * (height - 2))[2]);
 
-                    (dataPtrWrite + nChan * x + widthStep * (heigh - 1))[2] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
+                    (dataPtrWrite + nChan * x + widthStep * (height - 1))[2] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
                 }
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     // Left
                     Sx = ((dataPtrRead + widthStep * (y - 1))[0] + (2 * (dataPtrRead + widthStep * y)[0]) + (dataPtrRead + widthStep * (y + 1))[0]) -
@@ -1114,7 +1115,7 @@ namespace CG_OpenCV
 
                     (dataPtrWrite + nChan * (width - 1) + widthStep * y)[2] = (byte)Math.Max(Math.Min(Math.Round(Math.Abs(Sx) + Math.Abs(Sy)), 255), 0);
                 }
-                for (int y = 1; y < heigh - 1; y++)
+                for (int y = 1; y < height - 1; y++)
                 {
                     for (int x = 1; x < width - 1; x++)
                     {
@@ -1468,7 +1469,6 @@ namespace CG_OpenCV
             }
         }
 
-
         public unsafe static void Translation(byte* dataPtrRead, byte* dataPtrWrite, int nChan, int widthStep, PuzzlePiece piece, int dx, int dy)
         {
             unsafe
@@ -1515,21 +1515,21 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="img"></param>
         /// <param name="imgCopy"></param>
-        public unsafe static PuzzlePiece[] DetectIndependentObjects(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, int width, int heigh)
+        public unsafe static PuzzlePiece[] DetectIndependentObjects(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, int width, int height)
         {
             // Stores the current tag as key and the equity tag
-            int[] linked = new int[width * heigh];
+            int[] linked = new int[width * height];
 
             // Temporarily stores the neighbors of the current pixel - Not sure about the performance cost tho.
             int[] neighbors = new int[2];
 
             // Contains the labels for each pixel
-            int[,] labels = new int[width, heigh];
+            int[,] labels = new int[width, height];
 
             // The next label to be given
             int nextLabel = 1;
 
-            for (int y = 0; y < heigh; y++)
+            for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
@@ -1545,7 +1545,7 @@ namespace CG_OpenCV
                             nNeigh++;
                         }
                         // Checks the right pixel
-                        if (y - 1 >= 0 && y - 1 < heigh && labels[x, y - 1] != 0)
+                        if (y - 1 >= 0 && y - 1 < height && labels[x, y - 1] != 0)
                         {
                             neighbors[nNeigh] = labels[x, y - 1];
                             nNeigh++;
@@ -1595,7 +1595,7 @@ namespace CG_OpenCV
 
             // Travels the image and for each pixel loops through the tags
             // until it has the lowest tag possible
-            for (int y = 0; y < heigh; y++)
+            for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
@@ -1665,10 +1665,10 @@ namespace CG_OpenCV
         /// <summary>
         /// Draws a red bounding box around the image
         /// </summary>
-        /// <param name="dataPtrWrite"></param>
-        /// <param name="nChan"></param>
-        /// <param name="widthStep"></param>
-        /// <param name="images"></param>
+        /// <param name="dataPtrWrite"> Image to be modified </param>
+        /// <param name="nChan"> Number of channels (3, RGB) </param>
+        /// <param name="widthStep"> steps point should move on x </param>
+        /// <param name="images"> array of the images found </param>
         private unsafe static void DrawBoundingBoxes(byte* dataPtrWrite, int nChan, int widthStep, PuzzlePiece[] images)
         {
             for (int n = 0; n < images.Length; n++)
@@ -1697,36 +1697,77 @@ namespace CG_OpenCV
             }
         }
 
+        /// <summary>
+        /// Find the bottom/left most point and the bottom/right most point
+        /// then finds the rotation between the two and rotates the image
+        /// on the original image
+        ///        ___
+        ///     ___   |
+        ///  ___       |
+        /// |         __BR
+        ///  |    ___
+        ///   BL__
+        ///
+        /// Then updates the bounding box after the rotation by "raycasting"
+        /// from the top center and left center to the center of the image
+        ///   _____________
+        ///  |  ____|____  |
+        ///  |_|         | |
+        ///  | |_________| |
+        ///  |_____________|
+        /// </summary>
+        /// <param name="dataPtrWrite"> Image to be modified </param>
+        /// <param name="dataPtrRead"> Image to get data from </param>
+        /// <param name="nChan"> Number of channels (3, RGB) </param>
+        /// <param name="widthStep"> steps point should move on x </param>
+        /// <param name="images"> array of the images found </param>
         private static unsafe void FindRotation(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, PuzzlePiece[] images)
         {
             for (int i = 0; i < images.Length; i++)
             {
-                if (IsPixelBackGroundColor(images[i].Top.x , images[i].Top.y))
+                // Checks if the first pixel of the image is the background
+                // color, if it is, assumes it is rotated
+                if (IsPixelBackGroundColor(images[i].Top.x, images[i].Top.y))
                 {
-                    Vector2Int bottom = new Vector2Int();
-                    // This only works for images rotated counter clockwise
+                    Vector2Int bottomLeft = new Vector2Int();
+                    Vector2Int bottomRight = new Vector2Int();
+
+                    // Note: This only works for images rotated counter clockwise
+                    // Checks the bottom/left most pixel and the bottom/right
+                    // pixels of the image
                     for (int x = images[i].Top.x; x <= images[i].Bottom.x; x++)
                     {
+                        // If the pixel is not background means we found the
+                        // lowest and most left pixel
                         if (!IsPixelBackGroundColor(x, images[i].Bottom.y))
                         {
-                            bottom = new Vector2Int(x, images[i].Bottom.y);
+                            bottomLeft = new Vector2Int(x, images[i].Bottom.y);
                             break;
                         }
                     }
-                    Vector2Int bottomRight = new Vector2Int();
 
                     for (int y = images[i].Top.y; y <= images[i].Bottom.y; y++)
                     {
+                        // If the pixel is not background means we found one
+                        // of the lowest most right pixel, but uncertain ig
+                        // it is actually the lowest
                         if (!IsPixelBackGroundColor(images[i].Bottom.x, y))
                         {
-                            bottomRight = new Vector2Int(images[i].Bottom.x, y - 1);
-                            break;
+                            bottomRight = new Vector2Int(images[i].Bottom.x, y);
                         }
                     }
 
-                    double delta = PuzzlePiece.ImageAngle(bottomRight, bottom);
-                    Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, images[i], (delta * Math.PI / 180.0));
+                    // Finds the angle between the two points found
+                    double delta = PuzzlePiece.ImageAngle(bottomRight, bottomLeft);
 
+                    // Rotates a specific image in the original image, converting
+                    // degrees to radians
+                    Rotation(dataPtrWrite, dataPtrRead, nChan, widthStep, images[i], delta * Math.PI / 180.0);
+
+                    // Updates the bounding box
+                    // Note: this sucks. If it's not rotated properly
+                    // (jagged edges problem) it will move the bounding box
+                    // 1 pixel in more than it should, also not efficent
                     Vector2Int newBoundTop;
                     Vector2Int newBoundBottom;
 
@@ -1737,7 +1778,7 @@ namespace CG_OpenCV
                     {
                         if (!IsPixelBackGroundColor(images[i].Top.x + (int)(images[i].Width / 2f), nY))
                         {
-                            newYBound = nY + 1;
+                            newYBound = nY;
                             break;
                         }
                     }
@@ -1745,24 +1786,26 @@ namespace CG_OpenCV
                     {
                         if (!IsPixelBackGroundColor(nX, images[i].Top.y + (int)(images[i].Height / 2f)))
                         {
-                            newXBound = nX + 1;
+                            newXBound = nX;
                             break;
                         }
                     }
-                    //newBoundTop = new Vector2Int(newXBound, newYBound);
-                    //newBoundBottom = new Vector2Int(
-                    //    images[i].Bottom.x - Math.Abs(images[i].Top.x - newXBound),
-                    //    images[i].Bottom.y - Math.Abs(images[i].Top.y - newYBound));
+                    newBoundTop = new Vector2Int(newXBound, newYBound);
 
-                    //images[i] = new PuzzlePiece(newBoundTop, newBoundBottom);
+                    newBoundBottom = new Vector2Int(
+                        images[i].Bottom.x - Math.Abs(images[i].Top.x - newXBound),
+                        images[i].Bottom.y - Math.Abs(images[i].Top.y - newYBound));
+
+                    // Updates that piece with the correct bounding box and angle
+                    images[i] = new PuzzlePiece(newBoundTop, newBoundBottom, delta);
                 }
             }
             bool IsPixelBackGroundColor(int x, int y)
             {
                 return (
-                    (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+                    (dataPtrWrite + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
+                    (dataPtrWrite + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
+                    (dataPtrWrite + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
             }
         }
 
@@ -1774,12 +1817,8 @@ namespace CG_OpenCV
         /// <param name="Pieces_positions">List of positions (Left-x,Top-y,Right-x,Bottom-y) of all detected pieces</param>
         /// <param name="Pieces_angle">List of detected pieces' angles</param>
         /// <param name="level">Level of image</param>
-        public static void puzzle(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, out List<int[]> Pieces_positions, out List<int> Pieces_angle, int level)
+        public static Image<Bgr, byte> puzzle(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, out List<int[]> Pieces_positions, out List<int> Pieces_angle, int level)
         {
-            Pieces_positions = new List<int[]>();
-            int[] piece_vector = new int[4];
-            Bgr backgroundColor = new Bgr(0, 0, 0);
-
             unsafe
             {
                 MIplImage m = img.MIplImage;
@@ -1789,28 +1828,33 @@ namespace CG_OpenCV
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
 
                 int width = imgCopy.Width;
-                int heigh = imgCopy.Height;
+                int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
 
-                PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, heigh);
+                PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
                 FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
                 DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
 
-                backgroundColor.Red = dataPtrRead[0];
-                backgroundColor.Green = dataPtrRead[1];
-                backgroundColor.Blue = dataPtrRead[2];
+                // Creates the lists
+                Pieces_positions = new List<int[]>();
+                Pieces_angle = new List<int>();
+
+                // Adds to the lists the angle and the position
+                for (int i = 0; i < puzzlePieces.Length; i++)
+                {
+                    Pieces_angle.Add((int)Math.Round(puzzlePieces[i].Angle));
+                    Pieces_positions.Add(new int[] { puzzlePieces[i].Top.x, puzzlePieces[i].Top.y, puzzlePieces[i].Bottom.x, puzzlePieces[i].Bottom.y });
+                }
+
+                // Create a new image where the size and content is the final
+                // connected puzzle
+                Image<Bgr, byte> finalImage = new Image<Bgr, byte>(puzzlePieces[0].Width, puzzlePieces[0].Height);
+                Rectangle cropArea = new Rectangle(puzzlePieces[0].Top.x, puzzlePieces[0].Top.y, puzzlePieces[0].Width, puzzlePieces[0].Height);
+                finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
+
+                return finalImage;
             }
-
-            piece_vector[0] = 65;   // x- Top-Left
-            piece_vector[1] = 385;  // y- Top-Left
-            piece_vector[2] = 1089; // x- Bottom-Right
-            piece_vector[3] = 1411; // y- Bottom-Right
-
-            Pieces_positions.Add(piece_vector);
-
-            Pieces_angle = new List<int>();
-            Pieces_angle.Add(0); // angle
         }
     }
 }
