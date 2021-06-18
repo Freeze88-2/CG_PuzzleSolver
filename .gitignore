@@ -11,6 +11,9 @@
 *.jfm
 *.exe
 
+SS_OpenCV/bin/Debug/CG_OpenCV.exe
+SS_OpenCV/obj/Debug/CG_OpenCV.exe
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

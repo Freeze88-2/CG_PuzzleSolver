@@ -32,6 +32,7 @@ namespace CG_OpenCV
         public int Width => width;
 
         public bool MergedPiece { get; }
+        public bool Used { get; set; }
 
         // WARNING: add the rest of the variables for side comparison
         private float leftDistance, rightDistance, topDistance, botDistance;
@@ -131,7 +132,7 @@ namespace CG_OpenCV
                     leftDistance = other.leftDistance;
 
                     translationY = top.y - other.top.y;
-                    translationX = bottom.x - other.top.x;
+                    translationX = top.x - other.bottom.x;
 
                     newTop = new Vector2Int(top.x - other.width, top.y);
                     newBottom = bottom;
@@ -159,7 +160,7 @@ namespace CG_OpenCV
                 byte* pxLeft = (dataPtrRead + 3 * top.x + widthStep * y);
                 leftDistance += pxLeft[0] + pxLeft[1] + pxLeft[2];
 
-                byte* pxRight = (dataPtrRead + 3 * top.y + widthStep * y);
+                byte* pxRight = (dataPtrRead + 3 * bottom.x + widthStep * y);
                 rightDistance += pxRight[0] + pxRight[1] + pxRight[2];
             }
         }
