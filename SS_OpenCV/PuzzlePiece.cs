@@ -175,6 +175,83 @@ namespace CG_OpenCV
             return -angle;
         }
 
+        public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side, byte* dataPtrRead, int widthStep) 
+        {
+            // right -- left
+            // top -- bottom
+
+            double distance = 0;
+            switch (side)
+            {
+                case Side.Top:
+                    if (a.width != b.width) return float.PositiveInfinity;
+                    for (int i = 0; i <= a.width; i++)
+                    {
+                        int ra = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[2];
+                        int ga = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[1];
+                        int ba = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[0];
+
+                        int rb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[2];
+                        int gb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[1];
+                        int bb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[0];
+
+                        float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
+                        distance += Math.Sqrt(sum);
+                    }
+                    break;
+                case Side.Right:
+                    if (a.height != b.height) return float.PositiveInfinity;
+                    for (int i = 0; i <= a.height; i++)
+                    {
+                        int ra = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[2];
+                        int ga = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[1];
+                        int ba = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[0];
+
+                        int rb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[2];
+                        int gb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[1];
+                        int bb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[0];
+
+                        float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
+                        distance += Math.Sqrt(sum);
+                    }
+                    break;
+                case Side.Bottom:
+                    if (a.width != b.width) return float.PositiveInfinity;
+                    for (int i = 0; i <= a.width; i++)
+                    {
+                        int ra = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[2];
+                        int ga = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[1];
+                        int ba = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[0];
+
+                        int rb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[2];
+                        int gb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[1];
+                        int bb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[0];
+
+                        float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
+                        distance += Math.Sqrt(sum);
+                    }
+                    break;
+                case Side.Left:
+                    if (a.height != b.height) return float.PositiveInfinity;
+                    for (int i = 0; i <= a.height; i++)
+                    {
+                        int ra = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[2];
+                        int ga = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[1];
+                        int ba = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[0];
+
+                        int rb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[2];
+                        int gb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[1];
+                        int bb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[0];
+
+                        float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
+                        distance += Math.Sqrt(sum);
+                    }
+                    break;
+            }
+
+            return distance;
+        }
+
         // Sides comparison functions
         // ETC...
 

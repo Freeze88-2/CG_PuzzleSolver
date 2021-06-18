@@ -1872,7 +1872,7 @@ namespace CG_OpenCV
                 for (int i = 0; i < puzzlePieces.Length; i++)
                 {
                     Side connectionSide = Side.Top;
-                    float min = float.PositiveInfinity;
+                    double min = float.PositiveInfinity;
                     int minIndex = -1;
 
                     for (int side = 0; side < 4; side++)
@@ -1881,11 +1881,13 @@ namespace CG_OpenCV
                         {
                             // Protect from comparing with the same puzzle piece
                             if (i == j) continue;
-                            if (!puzzlePieces[i].MatchSide(puzzlePieces[j])) continue;
 
-                            float dist = 0;
-                            dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
-
+                            double dist = 0;
+                            // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
+                            
+                            dist = PuzzlePiece.Compare(puzzlePieces[i], puzzlePieces[j],
+                                (Side)side, dataPtrRead, widthStep);
+                            
                             if (dist < min)
                             {
                                 min = dist;
