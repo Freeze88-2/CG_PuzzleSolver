@@ -1910,8 +1910,8 @@ namespace CG_OpenCV
                 // connected puzzle
                 Image<Bgr, byte> finalImage = new Image<Bgr, byte>(completed.Width, completed.Height);
                 Rectangle cropArea = new Rectangle(completed.Top.x, completed.Top.y, completed.Width, completed.Height);
-                // finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
-                return img;
+                finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
+                return finalImage;
             }
         }
     }
