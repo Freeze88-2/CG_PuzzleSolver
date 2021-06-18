@@ -181,6 +181,8 @@ namespace CG_OpenCV
             int minIndex = -1;
             for (int i = 0; i < others.Length; i++)
             {
+                if (others[i] == this) continue;
+
                 float dist = 0;
                 switch (side)
                 {

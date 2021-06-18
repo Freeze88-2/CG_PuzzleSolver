@@ -1488,17 +1488,11 @@ namespace CG_OpenCV
                             red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                             green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
                             blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
-                        }
-                        else
-                        {
-                            red = 0;
-                            green = 0;
-                            blue = 0;
-                        }
 
-                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
-                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
-                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
+                            (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
+                            (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
+                            (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
+                        }
                     }
                 }
             }
@@ -1821,11 +1815,14 @@ namespace CG_OpenCV
         {
             unsafe
             {
+                Image<Bgr, byte> final = img.Copy();
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
+                MIplImage mFinal = final.MIplImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
+                byte* dataPtrFinalWrite = (byte*)mFinal.imageData.ToPointer(); 
 
                 int width = imgCopy.Width;
                 int height = imgCopy.Height;
@@ -1834,7 +1831,15 @@ namespace CG_OpenCV
 
                 PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
                 FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
-                DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
+                // DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
+
+                for (int i = 0; i < puzzlePieces.Length; i++)
+                {
+                    puzzlePieces[i].CalculateSideAverage(dataPtrWrite, widthStep);
+                }
+
+                List<PuzzlePiece> pieceList = puzzlePieces.ToList();
+                PuzzlePiece combined = pieceList[0];
 
                 // Creates the lists
                 Pieces_positions = new List<int[]>();
@@ -1849,9 +1854,10 @@ namespace CG_OpenCV
 
                 // Create a new image where the size and content is the final
                 // connected puzzle
-                Image<Bgr, byte> finalImage = new Image<Bgr, byte>(puzzlePieces[0].Width, puzzlePieces[0].Height);
-                Rectangle cropArea = new Rectangle(puzzlePieces[0].Top.x, puzzlePieces[0].Top.y, puzzlePieces[0].Width, puzzlePieces[0].Height);
-                finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
+                 Image<Bgr, byte> finalImage = new Image<Bgr, byte>(combined.Bottom.x, combined.Bottom.y);
+                 Translation(final, final, -combined.Top.x, -combined.Top.y);
+                 Rectangle cropArea = new Rectangle(0, 0, combined.Width + 1, combined.Height + 1);
+                 finalImage.Bitmap = final.Bitmap.Clone(cropArea, final.Bitmap.PixelFormat);
 
                 return finalImage;
             }
