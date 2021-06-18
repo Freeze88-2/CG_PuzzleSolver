@@ -1863,56 +1863,58 @@ namespace CG_OpenCV
                     Pieces_angle.Add((int)Math.Round(puzzlePieces[i].Angle));
                     Pieces_positions.Add(new int[] { puzzlePieces[i].Top.x, puzzlePieces[i].Top.y, puzzlePieces[i].Bottom.x, puzzlePieces[i].Bottom.y });
 
-                    // for each piece calculate the side value
-                    puzzlePieces[i].CalculateSideAverage(dataPtrRead, widthStep);
+                    puzzlePieces[i].CreateImage(rotatedImage);
                 }
 
-                PuzzlePiece completed = puzzlePieces[0];
-                int pieceCount = puzzlePieces.Length;
-                for (int i = 0; i < puzzlePieces.Length; i++)
-                {
-                    Side connectionSide = Side.Top;
-                    double min = float.PositiveInfinity;
-                    int minIndex = -1;
 
-                    for (int side = 0; side < 4; side++)
-                    {
-                        for (int j = 0; j < puzzlePieces.Length; j++)
-                        {
-                            // Protect from comparing with the same puzzle piece
-                            if (i == j) continue;
-
-                            double dist = 0;
-                            // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
-                            
-                            dist = PuzzlePiece.Compare(puzzlePieces[i], puzzlePieces[j],
-                                (Side)side, dataPtrRead, widthStep);
-                            
-                            if (dist < min)
-                            {
-                                min = dist;
-                                minIndex = j;
-                                connectionSide = (Side)side;
-                            }
-                        }
-                    }
-
-                    if (minIndex >= 0) 
-                    {
-                        completed = puzzlePieces[i].Combine(puzzlePieces[minIndex], connectionSide, img, rotatedImage);
-                        puzzlePieces[i].Used = true;
-                        puzzlePieces[minIndex].Used = true;
-                        pieceCount -= 2;
-                    }
-                }
-
-                // Create a new image where the size and content is the final
-                // connected puzzle
-                Image<Bgr, byte> finalImage = new Image<Bgr, byte>(completed.Width, completed.Height);
-                Rectangle cropArea = new Rectangle(completed.Top.x, completed.Top.y, completed.Width, completed.Height);
-                finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
+                List<PuzzlePiece> pieces = new List<PuzzlePiece>(puzzlePieces);
+                Image<Bgr, byte> finalImage = RecursiveJoin(pieces).Img;
                 return finalImage;
             }
+        }
+
+        public static PuzzlePiece RecursiveJoin(List<PuzzlePiece> pieces)
+        {
+            // while
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                Side connectionSide = Side.Top;
+                double min = float.PositiveInfinity;
+                int minIndex = -1;
+
+                for (int side = 0; side < 4; side++)
+                {
+                    for (int j = 0; j < pieces.Count; j++)
+                    {
+                        // Protect from comparing with the same puzzle piece
+                        if (i == j) continue;
+
+                        double dist = 0;
+                        // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
+
+                        dist = PuzzlePiece.Compare(pieces[i], pieces[j], (Side)side);
+
+                        if (dist < min)
+                        {
+                            min = dist;
+                            minIndex = j;
+                            connectionSide = (Side)side;
+                        }
+                    }
+                }
+
+                if (minIndex > -1) 
+                {
+                    // Combine
+                    PuzzlePiece combined = pieces[i].Combine(pieces[minIndex], connectionSide);
+
+                    pieces[i] = combined;
+                    pieces.Remove(pieces[minIndex]);
+                    i = 0;
+                }
+            }
+
+            return pieces[0];
         }
     }
 }

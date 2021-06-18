@@ -1,6 +1,7 @@
 ﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using System.Drawing;
 
 namespace CG_OpenCV
 {
@@ -32,7 +33,7 @@ namespace CG_OpenCV
         public int Width => width;
 
         public bool MergedPiece { get; }
-        public bool Used { get; set; }
+        public Image<Bgr, byte> Img { get; private set; }
 
         // WARNING: add the rest of the variables for side comparison
         private float leftDistance, rightDistance, topDistance, botDistance;
@@ -64,6 +65,61 @@ namespace CG_OpenCV
             this.topDistance = topDistance;
             this.botDistance = botDistance;
             MergedPiece = true;
+        }
+
+        public unsafe void CreateImage(Image<Bgr, byte> original)
+        {
+            Img = new Image<Bgr, byte>(Width, Height);
+            Rectangle cropArea = new Rectangle(Top.x, Top.y, Width, Height);
+            Img.Bitmap = original.Bitmap.Clone(cropArea, original.Bitmap.PixelFormat);
+        }
+
+        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side) 
+        {
+            Vector2Int newTop = Vector2Int.Zero;
+            Vector2Int newBottom = Vector2Int.Zero;
+            Vector2Int ogPosition = Vector2Int.Zero;
+            Vector2Int otherPosition = Vector2Int.Zero;
+
+            // Create new piece
+            switch (side)
+            {
+                case Side.Top:
+                    // Calculate new bounds
+                    newTop = new Vector2Int(top.x, top.y - other.height);
+                    newBottom = bottom;
+                    ogPosition = new Vector2Int(0,  other.height);
+                    break;
+                case Side.Right:
+                    newTop = top;
+                    newBottom = new Vector2Int(bottom.x + other.width, bottom.y);
+                    otherPosition = new Vector2Int(Width, 0);
+                    break;
+                case Side.Bottom:
+                    newTop = top;
+                    newBottom = new Vector2Int(bottom.x, bottom.y + other.height);
+                    otherPosition = new Vector2Int(0, height);
+                    break;
+                case Side.Left:
+                    newTop = new Vector2Int(top.x - other.width, top.y);
+                    newBottom = bottom;
+                    ogPosition = new Vector2Int(other.width, 0);
+                    break;
+                    // newPiece.CalculateSideAverage();
+            }
+
+            PuzzlePiece p = new PuzzlePiece(newTop, newBottom);
+            
+            p.Img = new Image<Bgr, byte>(p.width, p.height);
+
+            p.Img.ROI = new Rectangle(otherPosition.x, otherPosition.y, other.width, other.height);
+            other.Img.CopyTo(p.Img);
+            p.Img.ROI = new Rectangle(ogPosition.x, ogPosition.y, width, height);
+            Img.CopyTo(p.Img);
+            
+            // Reset region of interest
+            p.Img.ROI = new Rectangle(0, 0, p.width, p.height);
+            return p;
         }
 
         /// <summary>
@@ -144,27 +200,6 @@ namespace CG_OpenCV
             return new PuzzlePiece(newTop, newBottom, leftDistance, rightDistance, topDistance, botDistance);
         }
 
-        public unsafe void CalculateSideAverage(byte* dataPtrRead, int widthStep)
-        {
-            for (int x = top.x; x < bottom.x; x++)
-            {
-                byte* pxTop = (dataPtrRead + 3 * x + widthStep * top.y);
-                topDistance += pxTop[0] + pxTop[1] + pxTop[2];
-
-                byte* pxBot = (dataPtrRead + 3 * x + widthStep * bottom.y);
-                botDistance += pxBot[0] + pxBot[1] + pxBot[2];
-            }
-
-            for (int y = top.y; y < bottom.y; y++)
-            {
-                byte* pxLeft = (dataPtrRead + 3 * top.x + widthStep * y);
-                leftDistance += pxLeft[0] + pxLeft[1] + pxLeft[2];
-
-                byte* pxRight = (dataPtrRead + 3 * bottom.x + widthStep * y);
-                rightDistance += pxRight[0] + pxRight[1] + pxRight[2];
-            }
-        }
-
         public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
         {
             Vector2Int diagonal = rightBottom - bottom;
@@ -175,10 +210,14 @@ namespace CG_OpenCV
             return -angle;
         }
 
-        public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side, byte* dataPtrRead, int widthStep) 
+        public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side) 
         {
             // right -- left
             // top -- bottom
+            byte* readA = (byte*)a.Img.MIplImage.imageData.ToPointer();
+            byte* readB = (byte*)b.Img.MIplImage.imageData.ToPointer();
+            int widthStepA = a.Img.MIplImage.widthStep;
+            int widthStepB = b.Img.MIplImage.widthStep;
 
             double distance = 0;
             switch (side)
@@ -187,13 +226,13 @@ namespace CG_OpenCV
                     if (a.width != b.width) return float.PositiveInfinity;
                     for (int i = 0; i <= a.width; i++)
                     {
-                        int ra = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[2];
-                        int ga = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[1];
-                        int ba = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.top.y)[0];
+                        int ra = (readA + 3 * (i) + widthStepA * 0)[2];
+                        int ga = (readA + 3 * (i) + widthStepA * 0)[1];
+                        int ba = (readA + 3 * (i) + widthStepA * 0)[0];
 
-                        int rb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[2];
-                        int gb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[1];
-                        int bb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.bottom.y)[0];
+                        int rb = (readB + 3 * (i) + widthStepB * b.height)[2];
+                        int gb = (readB + 3 * (i) + widthStepB * b.height)[1];
+                        int bb = (readB + 3 * (i) + widthStepB * b.height)[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -201,15 +240,15 @@ namespace CG_OpenCV
                     break;
                 case Side.Right:
                     if (a.height != b.height) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.height; i++)
+                    for (int i = 0; i < a.height; i++)
                     {
-                        int ra = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[2];
-                        int ga = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[1];
-                        int ba = (dataPtrRead + 3 * a.bottom.x + widthStep * (i + (a.bottom.y - a.height)))[0];
+                        int ra = (readA + 3 * a.width + widthStepA * (i))[2];
+                        int ga = (readA + 3 * a.width + widthStepA * (i))[1];
+                        int ba = (readA + 3 * a.width + widthStepA * (i))[0];
 
-                        int rb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[2];
-                        int gb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[1];
-                        int bb = (dataPtrRead + 3 * b.top.x + widthStep * (i + b.top.y))[0];
+                        int rb = (readB + 3 * 0 + widthStepB * (i))[2];
+                        int gb = (readB + 3 * 0 + widthStepB * (i))[1];
+                        int bb = (readB + 3 * 0 + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -219,13 +258,13 @@ namespace CG_OpenCV
                     if (a.width != b.width) return float.PositiveInfinity;
                     for (int i = 0; i <= a.width; i++)
                     {
-                        int ra = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[2];
-                        int ga = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[1];
-                        int ba = (dataPtrRead + 3 * (i + a.top.x) + widthStep * a.bottom.y)[0];
+                        int ra = (readA + 3 * (i) + widthStepA * a.height)[2];
+                        int ga = (readA + 3 * (i) + widthStepA * a.height)[1];
+                        int ba = (readA + 3 * (i) + widthStepA * a.height)[0];
 
-                        int rb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[2];
-                        int gb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[1];
-                        int bb = (dataPtrRead + 3 * (i + b.top.x) + widthStep * b.top.y)[0];
+                        int rb = (readB + 3 * (i) + widthStepB * 0)[2];
+                        int gb = (readB + 3 * (i) + widthStepB * 0)[1];
+                        int bb = (readB + 3 * (i) + widthStepB * 0)[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -235,13 +274,13 @@ namespace CG_OpenCV
                     if (a.height != b.height) return float.PositiveInfinity;
                     for (int i = 0; i <= a.height; i++)
                     {
-                        int ra = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[2];
-                        int ga = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[1];
-                        int ba = (dataPtrRead + 3 * a.top.x + widthStep * (i + a.top.y))[0];
+                        int ra = (readA + 3 * 0 + widthStepA * (i))[2];
+                        int ga = (readA + 3 * 0 + widthStepA * (i))[1];
+                        int ba = (readA + 3 * 0 + widthStepA * (i))[0];
 
-                        int rb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[2];
-                        int gb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[1];
-                        int bb = (dataPtrRead + 3 * b.bottom.x + widthStep * (i + (b.bottom.y - b.height)))[0];
+                        int rb = (readB + 3 * b.width + widthStepB * (i))[2];
+                        int gb = (readB + 3 * b.width + widthStepB * (i))[1];
+                        int bb = (readB + 3 * b.width + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
