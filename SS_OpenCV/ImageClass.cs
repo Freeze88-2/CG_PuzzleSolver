@@ -1483,7 +1483,6 @@ namespace CG_OpenCV
                 int height = imgCopy.Height;
                 int nChan = mUndo.nChannels;
                 int widthStep = mUndo.widthStep;
-                byte red, green, blue;
                 int x0, y0;
 
                 for (int y = 0; y < height; y++)
@@ -1495,20 +1494,10 @@ namespace CG_OpenCV
 
                         if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
                         {
-                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
-                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
-                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
+                            (dataPtrWrite + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
+                            (dataPtrWrite + nChan * x + widthStep * y)[1] = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
+                            (dataPtrWrite + nChan * x + widthStep * y)[0] = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
                         }
-                        else
-                        {
-                            red = (dataPtrRead + nChan * x + widthStep * y)[2];
-                            green = (dataPtrRead + nChan * x + widthStep * y)[1];
-                            blue = (dataPtrRead + nChan * x + widthStep * y)[0];
-                        }
-
-                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
-                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
-                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
                     }
                 }
             }
@@ -1884,10 +1873,10 @@ namespace CG_OpenCV
 
                             double dist = 0;
                             // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
-                            
+
                             dist = PuzzlePiece.Compare(puzzlePieces[i], puzzlePieces[j],
                                 (Side)side, dataPtrRead, widthStep);
-                            
+
                             if (dist < min)
                             {
                                 min = dist;
@@ -1897,7 +1886,7 @@ namespace CG_OpenCV
                         }
                     }
 
-                    if (minIndex >= 0) 
+                    if (minIndex >= 0)
                     {
                         completed = puzzlePieces[i].Combine(puzzlePieces[minIndex], connectionSide, img, rotatedImage);
                         puzzlePieces[i].Used = true;
