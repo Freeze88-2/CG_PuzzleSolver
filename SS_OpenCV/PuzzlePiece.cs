@@ -202,27 +202,32 @@ namespace CG_OpenCV
 
         public float CompareSide(PuzzlePiece other, Side side)
         {
-            float dist = 0;
+            float dist = float.PositiveInfinity;
             switch (side)
             {
                 case Side.Top:
-                    dist = Math.Abs(topDistance - other.botDistance);
+                    dist = Math.Abs(other.botDistance - topDistance);
                     break;
 
                 case Side.Right:
-                    dist = Math.Abs(rightDistance - other.leftDistance);
+                    dist = Math.Abs(other.leftDistance - rightDistance);
                     break;
 
                 case Side.Bottom:
-                    dist = Math.Abs(botDistance - other.topDistance);
+                    dist = Math.Abs(other.topDistance - botDistance);
                     break;
 
                 case Side.Left:
-                    dist = Math.Abs(leftDistance - other.rightDistance);
+                    dist = Math.Abs(other.rightDistance - leftDistance);
                     break;
             }
 
             return dist;
+        }
+
+        public bool MatchSide(PuzzlePiece other) 
+        {
+            return other.width == width || other.height == height;
         }
     }
 

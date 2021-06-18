@@ -1833,6 +1833,7 @@ namespace CG_OpenCV
             {
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
+                Image<Bgr, byte> rotatedImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
@@ -1845,6 +1846,12 @@ namespace CG_OpenCV
                 PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
                 FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
                 // DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
+
+                // Update our read pointer with a copy of the rotated pieces image
+                rotatedImage = img.Clone();
+                dataPtrRead = (byte*)rotatedImage.MIplImage.imageData.ToPointer();
+
+
 
                 // Creates the lists
                 Pieces_positions = new List<int[]>();
@@ -1860,9 +1867,8 @@ namespace CG_OpenCV
                     puzzlePieces[i].CalculateSideAverage(dataPtrRead, widthStep);
                 }
 
-                PuzzlePiece completed = null;
+                PuzzlePiece completed = puzzlePieces[0];
                 int pieceCount = puzzlePieces.Length;
-
                 for (int i = 0; i < puzzlePieces.Length; i++)
                 {
                     Side connectionSide = Side.Top;
@@ -1875,6 +1881,7 @@ namespace CG_OpenCV
                         {
                             // Protect from comparing with the same puzzle piece
                             if (i == j) continue;
+                            if (!puzzlePieces[i].MatchSide(puzzlePieces[j])) continue;
 
                             float dist = 0;
                             dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
@@ -1888,16 +1895,21 @@ namespace CG_OpenCV
                         }
                     }
 
-                    completed = puzzlePieces[i].Combine(puzzlePieces[minIndex], connectionSide, img, imgCopy);
-                    break;
+                    if (minIndex >= 0) 
+                    {
+                        completed = puzzlePieces[i].Combine(puzzlePieces[minIndex], connectionSide, img, rotatedImage);
+                        puzzlePieces[i].Used = true;
+                        puzzlePieces[minIndex].Used = true;
+                        pieceCount -= 2;
+                    }
                 }
 
                 // Create a new image where the size and content is the final
                 // connected puzzle
                 Image<Bgr, byte> finalImage = new Image<Bgr, byte>(completed.Width, completed.Height);
                 Rectangle cropArea = new Rectangle(completed.Top.x, completed.Top.y, completed.Width, completed.Height);
-                finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
-                return finalImage;
+                // finalImage.Bitmap = img.Bitmap.Clone(cropArea, img.Bitmap.PixelFormat);
+                return img;
             }
         }
     }
