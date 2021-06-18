@@ -1,4 +1,6 @@
 ﻿using System;
+using Emgu.CV;
+using Emgu.CV.Structure;
 
 namespace CG_OpenCV
 {
@@ -70,7 +72,7 @@ namespace CG_OpenCV
         /// <param name="other"></param>
         /// <param name="side"></param>
         /// <returns></returns>
-        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side, byte* read, byte* write, int widthStep)
+        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side, Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
             // Side references to this piece and not other.
             // if side == top then combine with bottom of other
@@ -137,7 +139,7 @@ namespace CG_OpenCV
                     // newPiece.CalculateSideAverage();
             }
 
-            ImageClass.Translation(read, write, 3, widthStep, other, translationX, translationY);
+            ImageClass.Translation(img, imgCopy, other, translationX, translationY);
             return new PuzzlePiece(newTop, newBottom, leftDistance, rightDistance, topDistance, botDistance);
         }
 
@@ -181,25 +183,11 @@ namespace CG_OpenCV
             int minIndex = -1;
             for (int i = 0; i < others.Length; i++)
             {
+                // Protect from comparing with the same puzzle piece
+                if (others[i] == this) continue;
+
                 float dist = 0;
-                switch (side)
-                {
-                    case Side.Top:
-                        dist = Math.Abs(topDistance - others[i].botDistance);
-                        break;
-
-                    case Side.Right:
-                        dist = Math.Abs(rightDistance - others[i].leftDistance);
-                        break;
-
-                    case Side.Bottom:
-                        dist = Math.Abs(botDistance - others[i].topDistance);
-                        break;
-
-                    case Side.Left:
-                        dist = Math.Abs(leftDistance - others[i].rightDistance);
-                        break;
-                }
+                dist = CompareSide(others[i], side);
 
                 if (dist < min)
                 {
@@ -209,6 +197,31 @@ namespace CG_OpenCV
             }
 
             return others[minIndex];
+        }
+
+        public float CompareSide(PuzzlePiece other, Side side)
+        {
+            float dist = 0;
+            switch (side)
+            {
+                case Side.Top:
+                    dist = Math.Abs(topDistance - other.botDistance);
+                    break;
+
+                case Side.Right:
+                    dist = Math.Abs(rightDistance - other.leftDistance);
+                    break;
+
+                case Side.Bottom:
+                    dist = Math.Abs(botDistance - other.topDistance);
+                    break;
+
+                case Side.Left:
+                    dist = Math.Abs(leftDistance - other.rightDistance);
+                    break;
+            }
+
+            return dist;
         }
     }
 
