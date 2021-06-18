@@ -1,4 +1,6 @@
 ﻿using System;
+using Emgu.CV;
+using Emgu.CV.Structure;
 
 namespace CG_OpenCV
 {
@@ -30,6 +32,7 @@ namespace CG_OpenCV
         public int Width => width;
 
         public bool MergedPiece { get; }
+        public bool Used { get; set; }
 
         // WARNING: add the rest of the variables for side comparison
         private float leftDistance, rightDistance, topDistance, botDistance;
@@ -70,7 +73,7 @@ namespace CG_OpenCV
         /// <param name="other"></param>
         /// <param name="side"></param>
         /// <returns></returns>
-        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side, byte* read, byte* write, int widthStep)
+        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side, Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
         {
             // Side references to this piece and not other.
             // if side == top then combine with bottom of other
@@ -129,7 +132,7 @@ namespace CG_OpenCV
                     leftDistance = other.leftDistance;
 
                     translationY = top.y - other.top.y;
-                    translationX = bottom.x - other.top.x;
+                    translationX = top.x - other.bottom.x;
 
                     newTop = new Vector2Int(top.x - other.width, top.y);
                     newBottom = bottom;
@@ -137,7 +140,7 @@ namespace CG_OpenCV
                     // newPiece.CalculateSideAverage();
             }
 
-            ImageClass.Translation(read, write, 3, widthStep, other, translationX, translationY);
+            ImageClass.Translation(img, imgCopy, other, translationX, translationY);
             return new PuzzlePiece(newTop, newBottom, leftDistance, rightDistance, topDistance, botDistance);
         }
 
@@ -157,7 +160,7 @@ namespace CG_OpenCV
                 byte* pxLeft = (dataPtrRead + 3 * top.x + widthStep * y);
                 leftDistance += pxLeft[0] + pxLeft[1] + pxLeft[2];
 
-                byte* pxRight = (dataPtrRead + 3 * top.y + widthStep * y);
+                byte* pxRight = (dataPtrRead + 3 * bottom.x + widthStep * y);
                 rightDistance += pxRight[0] + pxRight[1] + pxRight[2];
             }
         }
@@ -181,27 +184,11 @@ namespace CG_OpenCV
             int minIndex = -1;
             for (int i = 0; i < others.Length; i++)
             {
+                // Protect from comparing with the same puzzle piece
                 if (others[i] == this) continue;
 
                 float dist = 0;
-                switch (side)
-                {
-                    case Side.Top:
-                        dist = Math.Abs(topDistance - others[i].botDistance);
-                        break;
-
-                    case Side.Right:
-                        dist = Math.Abs(rightDistance - others[i].leftDistance);
-                        break;
-
-                    case Side.Bottom:
-                        dist = Math.Abs(botDistance - others[i].topDistance);
-                        break;
-
-                    case Side.Left:
-                        dist = Math.Abs(leftDistance - others[i].rightDistance);
-                        break;
-                }
+                dist = CompareSide(others[i], side);
 
                 if (dist < min)
                 {
@@ -211,6 +198,36 @@ namespace CG_OpenCV
             }
 
             return others[minIndex];
+        }
+
+        public float CompareSide(PuzzlePiece other, Side side)
+        {
+            float dist = float.PositiveInfinity;
+            switch (side)
+            {
+                case Side.Top:
+                    dist = Math.Abs(other.botDistance - topDistance);
+                    break;
+
+                case Side.Right:
+                    dist = Math.Abs(other.leftDistance - rightDistance);
+                    break;
+
+                case Side.Bottom:
+                    dist = Math.Abs(other.topDistance - botDistance);
+                    break;
+
+                case Side.Left:
+                    dist = Math.Abs(other.rightDistance - leftDistance);
+                    break;
+            }
+
+            return dist;
+        }
+
+        public bool MatchSide(PuzzlePiece other) 
+        {
+            return other.width == width || other.height == height;
         }
     }
 
