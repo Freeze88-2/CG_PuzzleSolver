@@ -222,6 +222,10 @@ public static void DrawBounds(Image<Bgr,byte> img, Image<Bgr, byte> imgCopy)
 public static void RotateIndividualPieces(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
 ```
 
+Existem outros métodos disponíveis na `ImageClass` que o utilizador do programa pode aceder através do seguinte menu:
+
+![functions]
+
 ### Outras Soluções
 
 Até chegarmos à solução atual experimentámos de várias formas diferentes, sendo o mais difícil encontrar uma forma clara e simples de connecter e mover as peças para as suas posições finais assim como compara-las de forma a não ter que calcular as distâncias a cada iteração do algoritmo.

@@ -37,3 +37,4 @@ C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CoreC
 C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.csproj.CopyComplete
 C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.exe
 C:\Users\andre\Desktop\CG_OpenCV_Base\SS_OpenCV\obj\Debug\CG_OpenCV.pdb
+C:\Users\Rodrigo Pinheiro\Desktop\CG\CG_PuzzleSolver\SS_OpenCV\obj\Debug\CG_OpenCV.MatrixInput.resources

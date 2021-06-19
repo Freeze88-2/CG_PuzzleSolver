@@ -1971,7 +1971,7 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="pieces"> List of puzzle pieces found </param>
         /// <returns> Completed image </returns>
-        public static PuzzlePiece Join(List<PuzzlePiece> pieces)
+        private static PuzzlePiece Join(List<PuzzlePiece> pieces)
         {
             // while
             for (int i = 0; i < pieces.Count; i++)

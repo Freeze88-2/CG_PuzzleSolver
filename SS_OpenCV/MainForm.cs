@@ -408,5 +408,131 @@ namespace CG_OpenCV
 
             Cursor = Cursors.Default;
         }
+
+        private void robertsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.Roberts(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void diferentiationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.Diferentiation(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void sobelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.Sobel(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void meanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.Mean(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void medianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.Median(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void nonUniformToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+            float[,] matrix = new float[3,3];
+            float weight = 1f;
+
+            MatrixInput input = new MatrixInput("Non Uniform Matrix Input");
+            input.ShowDialog();
+
+            for (int y = 0; y < matrix.GetLength(0); y++)
+            {
+                for (int x = 0; x < matrix.GetLength(1); x++)
+                {
+                    if (string.IsNullOrEmpty(input.InputMatrix[x, y].Text)) 
+                    {
+                        return;
+                    }
+                    matrix[x, y] = Convert.ToSingle(input.InputMatrix[x, y].Text);
+                }
+            }
+
+            if (string.IsNullOrEmpty(input.WeightInput.Text))
+            {
+                return;
+            }
+            weight = Convert.ToSingle(input.WeightInput.Text);
+            weight = Math.Min(1, Math.Max(weight, 0));
+
+            Cursor = Cursors.WaitCursor; // clock cursor
+            ImageClass.NonUniform(img, imgUndo, matrix, weight);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
     }
 }
