@@ -106,7 +106,7 @@ Para a nossa solução final foi apenas criada a classe `PuzzlePiece` que conté
 
 `PuzzlePiece` contém um único construtor, este recebe o canto superior esquerdo e o canto inferior direito da peça em questão na forma de `Vector2Int`. Também é possível passar o ângulo da peça se este já tiver sido calculado.
 
-![boundsImage][bounds]
+![bounds]
 
 ```cs
 public PuzzlePiece(Vector2Int top, Vector2Int bottom, double angle = 0)
