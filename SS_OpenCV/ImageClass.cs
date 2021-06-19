@@ -1885,7 +1885,7 @@ namespace CG_OpenCV
                 }
 
                 List<PuzzlePiece> pieces = new List<PuzzlePiece>(puzzlePieces);
-                return RecursiveJoin(pieces).Img;
+                return Join(pieces).Img;
             }
         }
 
@@ -1894,7 +1894,7 @@ namespace CG_OpenCV
         /// </summary>
         /// <param name="pieces"> List of puzzle pieces found </param>
         /// <returns> Completed image </returns>
-        public static PuzzlePiece RecursiveJoin(List<PuzzlePiece> pieces)
+        public static PuzzlePiece Join(List<PuzzlePiece> pieces)
         {
             // while
             for (int i = 0; i < pieces.Count; i++)

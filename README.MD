@@ -1,5 +1,7 @@
 # CG Puzzle Solver
 
+* [Repositório de código fonte](https://github.com/Freeze88-2/CG_PuzzleSolver)
+
 ## Autores
 
 [André Vitorino] 21902633
@@ -10,10 +12,11 @@
 - [Índice](#índice)
 - [Algoritmo](#algoritmo)
   - [Descrição](#descrição)
+  - [Função Join](#função-join)
 - [Classes](#classes)
 - [Métodos](#métodos)
 - [Outras Soluções](#outras-soluções)
-- [Referências](#referências)
+- [Problemas](#problemas)
 
 ### Algoritmo
 
@@ -32,6 +35,12 @@ Para esta solução encontramos peças independentes dentro de uma imagem, criam
 * O vetor das imagens é passado para outra função `FindRotation` que calcula e tenta rodar cada peça em volta do centro da própria. Esta rotação é escrita para a imagem original, ficando assim com uma imagem de peças direitas e um vetor de peças de puzzle com os limites definidos.
 
 * Com esta informação, inicializamos cada `PuzzlePiece` chamando `CreateImage(Image<Bgr, Byte> original)` para cada peça, esta função cria e guarda uma imagem que contem únicamente a peça correspondente aos limites criados anteriormente.
+
+* Com todas as peças base inicializadas, corremos o algoritmo da função `Join(List<PuzzlePiece> pieces)` que retorna uma única peça final de posição 0,0 e com comprimento e largura do nosso puzzle resolvido, sendo apenas necessário usar a propriedade `Img` de `PuzzlePiece` para retornar a imagem recortada final.
+
+#### Função Join
+
+
 
 ### Classes
 
