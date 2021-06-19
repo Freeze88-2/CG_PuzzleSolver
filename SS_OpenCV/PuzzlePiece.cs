@@ -89,23 +89,26 @@ namespace CG_OpenCV
                     newTop = new Vector2Int(top.x, top.y - other.height);
                     newBottom = bottom;
                     ogPosition = new Vector2Int(0,  other.height);
+
                     break;
                 case Side.Right:
                     newTop = top;
                     newBottom = new Vector2Int(bottom.x + other.width, bottom.y);
                     otherPosition = new Vector2Int(Width, 0);
+
                     break;
                 case Side.Bottom:
                     newTop = top;
                     newBottom = new Vector2Int(bottom.x, bottom.y + other.height);
                     otherPosition = new Vector2Int(0, height);
+
                     break;
                 case Side.Left:
                     newTop = new Vector2Int(top.x - other.width, top.y);
                     newBottom = bottom;
                     ogPosition = new Vector2Int(other.width, 0);
+
                     break;
-                    // newPiece.CalculateSideAverage();
             }
 
             PuzzlePiece p = new PuzzlePiece(newTop, newBottom);
@@ -216,23 +219,27 @@ namespace CG_OpenCV
             // top -- bottom
             byte* readA = (byte*)a.Img.MIplImage.imageData.ToPointer();
             byte* readB = (byte*)b.Img.MIplImage.imageData.ToPointer();
+
             int widthStepA = a.Img.MIplImage.widthStep;
             int widthStepB = b.Img.MIplImage.widthStep;
+            
+            int nChanA = a.Img.MIplImage.nChannels;
+            int nChanB = b.Img.MIplImage.nChannels;
 
             double distance = 0;
             switch (side)
             {
                 case Side.Top:
                     if (a.width != b.width) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.width; i++)
+                    for (int i = 0; i < a.width; i++)
                     {
-                        int ra = (readA + 3 * (i) + widthStepA * 0)[2];
-                        int ga = (readA + 3 * (i) + widthStepA * 0)[1];
-                        int ba = (readA + 3 * (i) + widthStepA * 0)[0];
+                        byte ra = (readA + nChanA * (i))[2];
+                        byte ga = (readA + nChanA * (i))[1];
+                        byte ba = (readA + nChanA * (i))[0];
 
-                        int rb = (readB + 3 * (i) + widthStepB * b.height)[2];
-                        int gb = (readB + 3 * (i) + widthStepB * b.height)[1];
-                        int bb = (readB + 3 * (i) + widthStepB * b.height)[0];
+                        byte rb = (readB + nChanB * (i) + widthStepB * (b.height - 1))[2];
+                        byte gb = (readB + nChanB * (i) + widthStepB * (b.height - 1))[1];
+                        byte bb = (readB + nChanB * (i) + widthStepB * (b.height - 1))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -242,13 +249,13 @@ namespace CG_OpenCV
                     if (a.height != b.height) return float.PositiveInfinity;
                     for (int i = 0; i < a.height; i++)
                     {
-                        int ra = (readA + 3 * a.width + widthStepA * (i))[2];
-                        int ga = (readA + 3 * a.width + widthStepA * (i))[1];
-                        int ba = (readA + 3 * a.width + widthStepA * (i))[0];
+                        byte ra = (readA + nChanA * (a.width - 1) + widthStepA * (i))[2];
+                        byte ga = (readA + nChanA * (a.width - 1) + widthStepA * (i))[1];
+                        byte ba = (readA + nChanA * (a.width - 1) + widthStepA * (i))[0];
 
-                        int rb = (readB + 3 * 0 + widthStepB * (i))[2];
-                        int gb = (readB + 3 * 0 + widthStepB * (i))[1];
-                        int bb = (readB + 3 * 0 + widthStepB * (i))[0];
+                        byte rb = (readB + widthStepB * (i))[2];
+                        byte gb = (readB + widthStepB * (i))[1];
+                        byte bb = (readB + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -256,15 +263,15 @@ namespace CG_OpenCV
                     break;
                 case Side.Bottom:
                     if (a.width != b.width) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.width; i++)
+                    for (int i = 0; i < a.width; i++)
                     {
-                        int ra = (readA + 3 * (i) + widthStepA * a.height)[2];
-                        int ga = (readA + 3 * (i) + widthStepA * a.height)[1];
-                        int ba = (readA + 3 * (i) + widthStepA * a.height)[0];
+                        byte ra = (readA + nChanA * (i) + widthStepA * (a.height - 1))[2];
+                        byte ga = (readA + nChanA * (i) + widthStepA * (a.height - 1))[1];
+                        byte ba = (readA + nChanA * (i) + widthStepA * (a.height - 1))[0];
 
-                        int rb = (readB + 3 * (i) + widthStepB * 0)[2];
-                        int gb = (readB + 3 * (i) + widthStepB * 0)[1];
-                        int bb = (readB + 3 * (i) + widthStepB * 0)[0];
+                        byte rb = (readB + nChanB * (i))[2];
+                        byte gb = (readB + nChanB * (i))[1];
+                        byte bb = (readB + nChanB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -272,15 +279,15 @@ namespace CG_OpenCV
                     break;
                 case Side.Left:
                     if (a.height != b.height) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.height; i++)
+                    for (int i = 0; i < a.height; i++)
                     {
-                        int ra = (readA + 3 * 0 + widthStepA * (i))[2];
-                        int ga = (readA + 3 * 0 + widthStepA * (i))[1];
-                        int ba = (readA + 3 * 0 + widthStepA * (i))[0];
+                        byte ra = (readA + nChanA + widthStepA * (i))[2];
+                        byte ga = (readA + nChanA + widthStepA * (i))[1];
+                        byte ba = (readA + nChanA + widthStepA * (i))[0];
 
-                        int rb = (readB + 3 * b.width + widthStepB * (i))[2];
-                        int gb = (readB + 3 * b.width + widthStepB * (i))[1];
-                        int bb = (readB + 3 * b.width + widthStepB * (i))[0];
+                        byte rb = (readB + nChanB * (b.width - 1) + widthStepB * (i))[2];
+                        byte gb = (readB + nChanB * (b.width - 1) + widthStepB * (i))[1];
+                        byte bb = (readB + nChanB * (b.width - 1) + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
