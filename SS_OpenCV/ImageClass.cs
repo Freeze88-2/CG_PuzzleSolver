@@ -1468,40 +1468,6 @@ namespace CG_OpenCV
             }
         }
 
-        public static void Translation(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, PuzzlePiece piece, int dx, int dy)
-        {
-            unsafe
-            {
-                MIplImage m = img.MIplImage;
-                MIplImage mUndo = imgCopy.MIplImage;
-
-                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
-                byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
-
-                int width = imgCopy.Width;
-                int height = imgCopy.Height;
-                int nChan = mUndo.nChannels;
-                int widthStep = mUndo.widthStep;
-                int x0, y0;
-
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        x0 = x - dx;
-                        y0 = y - dy;
-
-                        if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
-                        {
-                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
-                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
-                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
-                        }
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Connected components algorithm, it takes the 0,0 pixel as the
         /// background color and finds and tags any images inside.
@@ -1614,14 +1580,14 @@ namespace CG_OpenCV
 
                     if (images.ContainsKey(newTag))
                     {
-                        if (x <= images[newTag][0])
+                        if (x < images[newTag][0])
                             images[newTag][0] = x;
-                        if (y <= images[newTag][1])
+                        if (y < images[newTag][1])
                             images[newTag][1] = y;
 
-                        if (x >= images[newTag][2])
+                        if (x > images[newTag][2])
                             images[newTag][2] = x;
-                        if (y >= images[newTag][3])
+                        if (y > images[newTag][3])
                             images[newTag][3] = y;
                     }
                     else
@@ -1652,10 +1618,10 @@ namespace CG_OpenCV
             // Checks if the pixel being checked is equal to the background
             bool IsPixelBackGroundColor(int x, int y)
             {
-                return (
+                return 
                     (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
                     (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2];
             }
             return imgs;
         }
@@ -1821,7 +1787,6 @@ namespace CG_OpenCV
             {
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
-                Image<Bgr, byte> rotatedImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
@@ -1835,10 +1800,6 @@ namespace CG_OpenCV
                 FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
                 // DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
 
-                // Update our read pointer with a copy of the rotated pieces image
-                rotatedImage = img.Clone();
-                dataPtrRead = (byte*)rotatedImage.MIplImage.imageData.ToPointer();
-
                 // Creates the lists
                 Pieces_positions = new List<int[]>();
                 Pieces_angle = new List<int>();
@@ -1849,15 +1810,19 @@ namespace CG_OpenCV
                     Pieces_angle.Add((int)Math.Round(puzzlePieces[i].Angle));
                     Pieces_positions.Add(new int[] { puzzlePieces[i].Top.x, puzzlePieces[i].Top.y, puzzlePieces[i].Bottom.x, puzzlePieces[i].Bottom.y });
 
-                    puzzlePieces[i].CreateImage(rotatedImage);
+                    puzzlePieces[i].CreateImage(img.Clone());
                 }
 
                 List<PuzzlePiece> pieces = new List<PuzzlePiece>(puzzlePieces);
-                Image<Bgr, byte> finalImage = RecursiveJoin(pieces).Img;
-                return finalImage;
+                return RecursiveJoin(pieces).Img;
             }
         }
 
+        /// <summary>
+        /// Joins the several puzzle pieces one by one
+        /// </summary>
+        /// <param name="pieces"> List of puzzle pieces found </param>
+        /// <returns> Completed image </returns>
         public static PuzzlePiece RecursiveJoin(List<PuzzlePiece> pieces)
         {
             // while
@@ -1874,10 +1839,7 @@ namespace CG_OpenCV
                         // Protect from comparing with the same puzzle piece
                         if (i == j) continue;
 
-                        double dist = 0;
-                        // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
-
-                        dist = PuzzlePiece.Compare(pieces[i], pieces[j], (Side)side);
+                        double dist = PuzzlePiece.Compare(pieces[i], pieces[j], (Side)side);
 
                         if (dist < min)
                         {
@@ -1891,9 +1853,7 @@ namespace CG_OpenCV
                 if (minIndex > -1)
                 {
                     // Combine
-                    PuzzlePiece combined = pieces[i].Combine(pieces[minIndex], connectionSide);
-
-                    pieces[i] = combined;
+                    pieces[i] = pieces[i].Combine(pieces[minIndex], connectionSide);
                     pieces.Remove(pieces[minIndex]);
                     i = 0;
                 }
