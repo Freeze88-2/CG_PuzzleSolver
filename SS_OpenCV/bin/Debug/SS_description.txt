@@ -1,5 +1,7 @@
-11111
-0
+21902663
+21802488
 0
 Indique aqui a lista de funcionalidades que valorizam o vosso projeto:
--
+- Algoritmo simples e fácil de entender
+- Visualização separada de limites de cada peça de puzzle
+- Visualização de peças rodadas
