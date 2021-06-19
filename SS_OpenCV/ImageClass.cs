@@ -1190,7 +1190,45 @@ namespace CG_OpenCV
                 }
             }
         }
+        public static void Roberts(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        {
+            MIplImage write = img.MIplImage;
+            MIplImage read = imgCopy.MIplImage;
 
+            int width = imgCopy.Width;
+            int height = imgCopy.Height;
+            int colorChn = write.nChannels;
+            int widthstep = write.widthStep;
+
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)read.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)write.imageData.ToPointer();
+
+                for (int i = 0; i < colorChn; i++)
+                {
+                    // Compute the center
+                    for (int y = 0; y < height - 1; y++)
+                    {
+                        for (int x = 0; x < width - 1; x++)
+                        {
+                            double xValue, yValue;
+                            xValue =
+                               (dataPtrRead + colorChn * (x) + widthstep * (y))[i] -
+                               (dataPtrRead + colorChn * (x + 1) + widthstep * (y + 1))[i];
+
+                            yValue =
+                                (dataPtrRead + colorChn * (x + 1) + widthstep * (y))[i] -
+                               (dataPtrRead + colorChn * (x) + widthstep * (y + 1))[i];
+
+                            double dif = Math.Abs(xValue) + Math.Abs(yValue);
+                            dif = Math.Round(dif);
+                            (dataPtrWrite + colorChn * x + widthstep * y)[i] = (byte)Math.Min(Math.Max(dif, 0), 255);
+                        }
+                    }
+                }
+            }
+        }
         /// <summary>
         /// Binarization of a given image
         /// </summary>
