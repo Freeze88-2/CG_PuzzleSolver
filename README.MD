@@ -18,7 +18,7 @@
   - [Vector2Int](#vector2int)
 - [Métodos Extra](#métodos-extra)
 - [Outras Soluções](#outras-soluções)
-- [Problemas](#problemas)
+- [Problemas Atuais](#problemas-atuais)
 
 ### Algoritmo
 
@@ -208,13 +208,46 @@ Para simplicidade, adicionámos uma propriedade estática que retorna um novo ve
 
 ### Métodos Extra
 
-Adicionámos vários métodos a `ImageClass` que nos ajudam a visualizar os passos do algoritmo de resolução de puzzles. 
+Adicionámos vários métodos a `ImageClass` que nos ajudam a visualizar os passos do algoritmo de resolução de puzzles.
+
+```cs
+public unsafe static PuzzlePiece[] DetectIndependentObjects(byte* dataPtrWrite, byte* dataPtrRead, int nChan, int widthStep, int width, int height)
+```
+
+```cs
+public static void DrawBounds(Image<Bgr,byte> img, Image<Bgr, byte> imgCopy)
+```
+
+```cs
+public static void RotateIndividualPieces(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+```
 
 ### Outras Soluções
 
+Até chegarmos à solução atual experimentámos de várias formas diferentes, sendo o mais difícil encontrar uma forma clara e simples de connecter e mover as peças para as suas posições finais assim como compara-las de forma a não ter que calcular as distâncias a cada iteração do algoritmo.
 
+**Conectividade de peças**
 
-### Problemas
+Em vez de criarmos imagens separadas por peças, eram guardadas as posições de cada peça da mesma forma através da `PuzzlePiece`, no entanto quando as queremos combinar, aplicava-mos uma translação de acordo com o lado a connecter na imagem final, movendo os pixeis da imagem original para a sua posição final da imagem de escrita. Por fim após termos as peças nos locais corretos usávamos o método de clonagem de imagens com o parâmetro opcional da zona de clonagem, retirando apenas a peça final.
+
+Problemas com a solução:
+   * Peças, por vezes, podiam ser movidas para fora da imagem final, perdendo informação.
+   * Algorítmos de comparação e junção mais lentos
+
+Pontos fortes:
+   * Uso de memória muito reduzido comparado com a solução atual.
+
+**Distância e comparação de bordas**
+
+Inicialmente tentamos uma abordagem diferente para comparar as bordas das peças. Cada peça, após ser construída, percorria as suas bordas por lado e guardava na sua instância a soma do valor dos pixeis desse lado. Quando queríamos comparar duas peças apenas necessitávamos de ver a diferença entre a soma dos lados correspondentes. Quando criávamos uma nova peça era apenas necessário somar os valores pré-calculados de acordo com os lados que união.
+
+Problemas:
+   * Raramente duas peças poderiam juntar-se pelo lado errado
+
+Pontos fortes:
+   * Retira bastante tempo ao algoritmo e usa valores antigos para calcular novos
+
+### Problemas Atuais
 
 1. De momento não é possível resolver imagens com peças rodadas, o programa consegue identificar e rodar peças mas estas ficam com desvios que afetam os passos de conexão do algoritmo. O utilizador pode usar o item de menu `Rotate Individual Pieces` para ver o resultado desta operação.
 
