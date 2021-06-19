@@ -2,7 +2,6 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace CG_OpenCV
@@ -1449,7 +1448,7 @@ namespace CG_OpenCV
                     x0 = (int)Math.Round((x - W) * cos - (H - y) * sin + W);
                     y0 = (int)Math.Round(H - (x - W) * sin - (H - y) * cos);
 
-                    if ((x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y))
+                    if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
                     {
                         red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
                         green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
@@ -1465,51 +1464,6 @@ namespace CG_OpenCV
                     (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
                     (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
                     (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
-                }
-            }
-        }
-
-        public static void Translation(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy, PuzzlePiece piece, int dx, int dy)
-        {
-            unsafe
-            {
-                MIplImage m = img.MIplImage;
-                MIplImage mUndo = imgCopy.MIplImage;
-
-                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
-                byte* dataPtrWrite = (byte*)m.imageData.ToPointer();
-
-                int width = imgCopy.Width;
-                int height = imgCopy.Height;
-                int nChan = mUndo.nChannels;
-                int widthStep = mUndo.widthStep;
-                byte red, green, blue;
-                int x0, y0;
-
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        x0 = x - dx;
-                        y0 = y - dy;
-
-                        if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
-                        {
-                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
-                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
-                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
-                        }
-                        else
-                        {
-                            red = (dataPtrRead + nChan * x + widthStep * y)[2];
-                            green = (dataPtrRead + nChan * x + widthStep * y)[1];
-                            blue = (dataPtrRead + nChan * x + widthStep * y)[0];
-                        }
-
-                        (dataPtrWrite + nChan * x + widthStep * y)[2] = red;
-                        (dataPtrWrite + nChan * x + widthStep * y)[1] = green;
-                        (dataPtrWrite + nChan * x + widthStep * y)[0] = blue;
-                    }
                 }
             }
         }
@@ -1664,10 +1618,10 @@ namespace CG_OpenCV
             // Checks if the pixel being checked is equal to the background
             bool IsPixelBackGroundColor(int x, int y)
             {
-                return (
+                return
                     (dataPtrRead + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
                     (dataPtrRead + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+                    (dataPtrRead + nChan * x + widthStep * y)[2] == dataPtrRead[2];
             }
             return imgs;
         }
@@ -1739,8 +1693,8 @@ namespace CG_OpenCV
                 // color, if it is, assumes it is rotated
                 if (IsPixelBackGroundColor(images[i].Top.x, images[i].Top.y))
                 {
-                    Vector2Int bottomLeft = new Vector2Int();
-                    Vector2Int bottomRight = new Vector2Int();
+                    Vector2Int bottomLeft = Vector2Int.Zero;
+                    Vector2Int bottomRight = Vector2Int.Zero;
 
                     // Note: This only works for images rotated counter clockwise
                     // Checks the bottom/left most pixel and the bottom/right
@@ -1756,7 +1710,7 @@ namespace CG_OpenCV
                         }
                     }
 
-                    for (int y = images[i].Top.y; y <= images[i].Bottom.y; y++)
+                    for (int y = images[i].Bottom.y; y > images[i].Top.y; y--)
                     {
                         // If the pixel is not background means we found one
                         // of the lowest most right pixel, but uncertain ig
@@ -1764,6 +1718,7 @@ namespace CG_OpenCV
                         if (!IsPixelBackGroundColor(images[i].Bottom.x, y))
                         {
                             bottomRight = new Vector2Int(images[i].Bottom.x, y);
+                            break;
                         }
                     }
 
@@ -1788,7 +1743,7 @@ namespace CG_OpenCV
                     {
                         if (!IsPixelBackGroundColor(images[i].Top.x + (int)(images[i].Width / 2f), nY))
                         {
-                            newYBound = nY;
+                            newYBound = nY + 1;
                             break;
                         }
                     }
@@ -1796,7 +1751,7 @@ namespace CG_OpenCV
                     {
                         if (!IsPixelBackGroundColor(nX, images[i].Top.y + (int)(images[i].Height / 2f)))
                         {
-                            newXBound = nX;
+                            newXBound = nX + 1;
                             break;
                         }
                     }
@@ -1806,16 +1761,86 @@ namespace CG_OpenCV
                         images[i].Bottom.x - Math.Abs(images[i].Top.x - newXBound),
                         images[i].Bottom.y - Math.Abs(images[i].Top.y - newYBound));
 
+                    // Edge cleanup (destructive)
+                    for (int x = newBoundTop.x; x < newBoundBottom.x; x++)
+                    {
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 1))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundTop.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 1))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundTop.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 1))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundTop.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 2))[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 2))[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 2))[2] = (dataPtrWrite)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 3))[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 3))[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundTop.y - 3))[2] = (dataPtrWrite)[2];
+
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 1))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 1))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 1))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 2))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 2))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 2))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 3))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 3))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 3))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 4))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 4))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 4))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 5))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 5))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 5))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 6))[0] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[0];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 6))[1] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[1];
+                        (dataPtrWrite + nChan * x + widthStep * (newBoundBottom.y + 6))[2] = (dataPtrWrite + nChan * x + widthStep * newBoundBottom.y)[2];
+
+                    }
+                    for (int y = newBoundTop.y; y <= newBoundBottom.y; y++)
+                    {
+                        (dataPtrWrite + nChan * (newBoundTop.x - 1) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 1) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 1) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+                        (dataPtrWrite + nChan * (newBoundTop.x - 2) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 2) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 2) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+                        (dataPtrWrite + nChan * (newBoundTop.x - 3) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 3) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundTop.x - 3) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 1) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 1) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 1) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 2) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 2) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 2) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 3) + widthStep * y)[0] = (dataPtrWrite)[0];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 3) + widthStep * y)[1] = (dataPtrWrite)[1];
+                        (dataPtrWrite + nChan * (newBoundBottom.x + 3) + widthStep * y)[2] = (dataPtrWrite)[2];
+
+                    }
+
                     // Updates that piece with the correct bounding box and angle
-                    images[i] = new PuzzlePiece(newBoundTop, newBoundBottom, delta);
+                    images[i] = new PuzzlePiece(new Vector2Int(newBoundTop.x + 3, newBoundTop.y - 1), new Vector2Int(newBoundBottom.x -2, newBoundBottom.y + 6), delta);
                 }
             }
             bool IsPixelBackGroundColor(int x, int y)
             {
-                return (
+                return
                     (dataPtrWrite + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
                     (dataPtrWrite + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
-                    (dataPtrWrite + nChan * x + widthStep * y)[2] == dataPtrRead[2]);
+                    (dataPtrWrite + nChan * x + widthStep * y)[2] == dataPtrRead[2];
             }
         }
 
@@ -1833,7 +1858,6 @@ namespace CG_OpenCV
             {
                 MIplImage m = img.MIplImage;
                 MIplImage mUndo = imgCopy.MIplImage;
-                Image<Bgr, byte> rotatedImage;
 
                 byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
                 byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
@@ -1845,13 +1869,7 @@ namespace CG_OpenCV
 
                 PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
                 FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
-                // DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
-
-                // Update our read pointer with a copy of the rotated pieces image
-                rotatedImage = img.Clone();
-                dataPtrRead = (byte*)rotatedImage.MIplImage.imageData.ToPointer();
-
-
+                //DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
 
                 // Creates the lists
                 Pieces_positions = new List<int[]>();
@@ -1863,16 +1881,19 @@ namespace CG_OpenCV
                     Pieces_angle.Add((int)Math.Round(puzzlePieces[i].Angle));
                     Pieces_positions.Add(new int[] { puzzlePieces[i].Top.x, puzzlePieces[i].Top.y, puzzlePieces[i].Bottom.x, puzzlePieces[i].Bottom.y });
 
-                    puzzlePieces[i].CreateImage(rotatedImage);
+                    puzzlePieces[i].CreateImage(img.Clone());
                 }
 
-
                 List<PuzzlePiece> pieces = new List<PuzzlePiece>(puzzlePieces);
-                Image<Bgr, byte> finalImage = RecursiveJoin(pieces).Img;
-                return finalImage;
+                return RecursiveJoin(pieces).Img;
             }
         }
 
+        /// <summary>
+        /// Joins the several puzzle pieces one by one
+        /// </summary>
+        /// <param name="pieces"> List of puzzle pieces found </param>
+        /// <returns> Completed image </returns>
         public static PuzzlePiece RecursiveJoin(List<PuzzlePiece> pieces)
         {
             // while
@@ -1889,10 +1910,7 @@ namespace CG_OpenCV
                         // Protect from comparing with the same puzzle piece
                         if (i == j) continue;
 
-                        double dist = 0;
-                        // dist = puzzlePieces[i].CompareSide(puzzlePieces[j], (Side)side);
-
-                        dist = PuzzlePiece.Compare(pieces[i], pieces[j], (Side)side);
+                        double dist = PuzzlePiece.Compare(pieces[i], pieces[j], (Side)side);
 
                         if (dist < min)
                         {
@@ -1903,17 +1921,14 @@ namespace CG_OpenCV
                     }
                 }
 
-                if (minIndex > -1) 
+                if (minIndex > -1)
                 {
                     // Combine
-                    PuzzlePiece combined = pieces[i].Combine(pieces[minIndex], connectionSide);
-
-                    pieces[i] = combined;
+                    pieces[i] = pieces[i].Combine(pieces[minIndex], connectionSide);
                     pieces.Remove(pieces[minIndex]);
                     i = 0;
                 }
             }
-
             return pieces[0];
         }
     }
