@@ -2,7 +2,6 @@
 using Emgu.CV.Structure;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace CG_OpenCV
@@ -1494,9 +1493,9 @@ namespace CG_OpenCV
 
                         if (x0 >= piece.Top.x && x0 < piece.Bottom.x && y0 >= piece.Top.y && y0 < piece.Bottom.y)
                         {
-                            red = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
-                            green = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
-                            blue = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
+                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[2];
+                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[1];
+                            (dataPtrRead + nChan * x + widthStep * y)[2] = (dataPtrRead + nChan * x0 + widthStep * y0)[0];
                         }
                     }
                 }
@@ -1615,14 +1614,14 @@ namespace CG_OpenCV
 
                     if (images.ContainsKey(newTag))
                     {
-                        if (x < images[newTag][0])
+                        if (x <= images[newTag][0])
                             images[newTag][0] = x;
-                        if (y < images[newTag][1])
+                        if (y <= images[newTag][1])
                             images[newTag][1] = y;
 
-                        if (x > images[newTag][2])
+                        if (x >= images[newTag][2])
                             images[newTag][2] = x;
-                        if (y > images[newTag][3])
+                        if (y >= images[newTag][3])
                             images[newTag][3] = y;
                     }
                     else
@@ -1840,8 +1839,6 @@ namespace CG_OpenCV
                 rotatedImage = img.Clone();
                 dataPtrRead = (byte*)rotatedImage.MIplImage.imageData.ToPointer();
 
-
-
                 // Creates the lists
                 Pieces_positions = new List<int[]>();
                 Pieces_angle = new List<int>();
@@ -1854,7 +1851,6 @@ namespace CG_OpenCV
 
                     puzzlePieces[i].CreateImage(rotatedImage);
                 }
-
 
                 List<PuzzlePiece> pieces = new List<PuzzlePiece>(puzzlePieces);
                 Image<Bgr, byte> finalImage = RecursiveJoin(pieces).Img;
@@ -1892,7 +1888,7 @@ namespace CG_OpenCV
                     }
                 }
 
-                if (minIndex > -1) 
+                if (minIndex > -1)
                 {
                     // Combine
                     PuzzlePiece combined = pieces[i].Combine(pieces[minIndex], connectionSide);
@@ -1902,7 +1898,6 @@ namespace CG_OpenCV
                     i = 0;
                 }
             }
-
             return pieces[0];
         }
     }

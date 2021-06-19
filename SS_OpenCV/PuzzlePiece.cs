@@ -1,6 +1,6 @@
-﻿using System;
-using Emgu.CV;
+﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using System;
 using System.Drawing;
 
 namespace CG_OpenCV
@@ -22,31 +22,31 @@ namespace CG_OpenCV
     /// </summary>
     internal class PuzzlePiece
     {
-        private Vector2Int top, bottom;
-        private int height;
-        private int width;
+        private Vector2Int _top, _bottom;
+        private int _height;
+        private int _width;
 
         public double Angle { get; }
-        public Vector2Int Top => top;
-        public Vector2Int Bottom => bottom;
-        public int Height => height;
-        public int Width => width;
+        public Vector2Int Top => _top;
+        public Vector2Int Bottom => _bottom;
+        public int Height => _height;
+        public int Width => _width;
 
         public bool MergedPiece { get; }
         public Image<Bgr, byte> Img { get; private set; }
 
         // WARNING: add the rest of the variables for side comparison
-        private float leftDistance, rightDistance, topDistance, botDistance;
+        private float _leftDistance, _rightDistance, _topDistance, _botDistance;
 
         public PuzzlePiece(Vector2Int top, Vector2Int bottom, double angle = 0, bool merged = false)
         {
-            this.top = top;
-            this.bottom = bottom;
+            this._top = top;
+            this._bottom = bottom;
 
-            height = bottom.y - top.y;
-            width = bottom.x - top.x;
+            _height = (bottom.y - top.y) + 1;
+            _width = (bottom.x - top.x) + 1;
 
-            leftDistance = rightDistance = topDistance = botDistance = 0;
+            _leftDistance = _rightDistance = _topDistance = _botDistance = 0;
             MergedPiece = merged;
             Angle = angle;
         }
@@ -54,16 +54,16 @@ namespace CG_OpenCV
         public PuzzlePiece(Vector2Int top, Vector2Int bottom,
                 float leftDistance, float rightDistance, float topDistance, float botDistance)
         {
-            this.top = top;
-            this.bottom = bottom;
+            this._top = top;
+            this._bottom = bottom;
 
-            height = bottom.y - top.y;
-            width = bottom.x - top.x;
+            _height = bottom.y - top.y;
+            _width = bottom.x - top.x;
 
-            this.leftDistance = leftDistance;
-            this.rightDistance = rightDistance;
-            this.topDistance = topDistance;
-            this.botDistance = botDistance;
+            this._leftDistance = leftDistance;
+            this._rightDistance = rightDistance;
+            this._topDistance = topDistance;
+            this._botDistance = botDistance;
             MergedPiece = true;
         }
 
@@ -74,7 +74,7 @@ namespace CG_OpenCV
             Img.Bitmap = original.Bitmap.Clone(cropArea, original.Bitmap.PixelFormat);
         }
 
-        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side) 
+        public unsafe PuzzlePiece Combine(PuzzlePiece other, Side side)
         {
             Vector2Int newTop = Vector2Int.Zero;
             Vector2Int newBottom = Vector2Int.Zero;
@@ -86,39 +86,42 @@ namespace CG_OpenCV
             {
                 case Side.Top:
                     // Calculate new bounds
-                    newTop = new Vector2Int(top.x, top.y - other.height);
-                    newBottom = bottom;
-                    ogPosition = new Vector2Int(0,  other.height);
+                    newTop = new Vector2Int(_top.x, _top.y - other._height);
+                    newBottom = _bottom;
+                    ogPosition = new Vector2Int(0, other._height);
                     break;
+
                 case Side.Right:
-                    newTop = top;
-                    newBottom = new Vector2Int(bottom.x + other.width, bottom.y);
+                    newTop = _top;
+                    newBottom = new Vector2Int(_bottom.x + other._width, _bottom.y);
                     otherPosition = new Vector2Int(Width, 0);
                     break;
+
                 case Side.Bottom:
-                    newTop = top;
-                    newBottom = new Vector2Int(bottom.x, bottom.y + other.height);
-                    otherPosition = new Vector2Int(0, height);
+                    newTop = _top;
+                    newBottom = new Vector2Int(_bottom.x, _bottom.y + other._height);
+                    otherPosition = new Vector2Int(0, _height);
                     break;
+
                 case Side.Left:
-                    newTop = new Vector2Int(top.x - other.width, top.y);
-                    newBottom = bottom;
-                    ogPosition = new Vector2Int(other.width, 0);
+                    newTop = new Vector2Int(_top.x - other._width, _top.y);
+                    newBottom = _bottom;
+                    ogPosition = new Vector2Int(other._width, 0);
                     break;
                     // newPiece.CalculateSideAverage();
             }
 
             PuzzlePiece p = new PuzzlePiece(newTop, newBottom);
-            
-            p.Img = new Image<Bgr, byte>(p.width, p.height);
 
-            p.Img.ROI = new Rectangle(otherPosition.x, otherPosition.y, other.width, other.height);
+            p.Img = new Image<Bgr, byte>(p._width, p._height);
+
+            p.Img.ROI = new Rectangle(otherPosition.x, otherPosition.y, other._width, other._height);
             other.Img.CopyTo(p.Img);
-            p.Img.ROI = new Rectangle(ogPosition.x, ogPosition.y, width, height);
+            p.Img.ROI = new Rectangle(ogPosition.x, ogPosition.y, _width, _height);
             Img.CopyTo(p.Img);
-            
+
             // Reset region of interest
-            p.Img.ROI = new Rectangle(0, 0, p.width, p.height);
+            p.Img.ROI = new Rectangle(0, 0, p._width, p._height);
             return p;
         }
 
@@ -144,60 +147,60 @@ namespace CG_OpenCV
             {
                 case Side.Top:
                     // Compute new side distances
-                    leftDistance += other.leftDistance;
-                    rightDistance += other.rightDistance;
-                    topDistance = other.topDistance;
+                    _leftDistance += other._leftDistance;
+                    _rightDistance += other._rightDistance;
+                    _topDistance = other._topDistance;
 
                     // Translation to connect the pieces
-                    translationY = top.y - other.bottom.y;
-                    translationX = top.x - other.top.x;
+                    translationY = _top.y - other._bottom.y;
+                    translationX = _top.x - other._top.x;
 
                     // Calculate new bounds
-                    newTop = new Vector2Int(top.x, top.y - other.height);
-                    newBottom = bottom;
+                    newTop = new Vector2Int(_top.x, _top.y - other._height);
+                    newBottom = _bottom;
 
                     break;
 
                 case Side.Right:
-                    topDistance += other.topDistance;
-                    botDistance += other.botDistance;
-                    rightDistance = other.rightDistance;
+                    _topDistance += other._topDistance;
+                    _botDistance += other._botDistance;
+                    _rightDistance = other._rightDistance;
 
-                    translationY = top.y - other.top.y;
-                    translationX = bottom.x - other.top.x;
+                    translationY = _top.y - other._top.y;
+                    translationX = _bottom.x - other._top.x;
 
-                    newTop = top;
-                    newBottom = new Vector2Int(bottom.x + other.width, bottom.y);
+                    newTop = _top;
+                    newBottom = new Vector2Int(_bottom.x + other._width, _bottom.y);
                     break;
 
                 case Side.Bottom:
-                    leftDistance += other.leftDistance;
-                    rightDistance += other.rightDistance;
-                    botDistance = other.botDistance;
+                    _leftDistance += other._leftDistance;
+                    _rightDistance += other._rightDistance;
+                    _botDistance = other._botDistance;
 
-                    translationY = bottom.y - other.top.y;
-                    translationX = top.x - other.top.x;
+                    translationY = _bottom.y - other._top.y;
+                    translationX = _top.x - other._top.x;
 
-                    newTop = top;
-                    newBottom = new Vector2Int(bottom.x, bottom.y + other.height);
+                    newTop = _top;
+                    newBottom = new Vector2Int(_bottom.x, _bottom.y + other._height);
                     break;
 
                 case Side.Left:
-                    topDistance += other.topDistance;
-                    botDistance += other.botDistance;
-                    leftDistance = other.leftDistance;
+                    _topDistance += other._topDistance;
+                    _botDistance += other._botDistance;
+                    _leftDistance = other._leftDistance;
 
-                    translationY = top.y - other.top.y;
-                    translationX = top.x - other.bottom.x;
+                    translationY = _top.y - other._top.y;
+                    translationX = _top.x - other._bottom.x;
 
-                    newTop = new Vector2Int(top.x - other.width, top.y);
-                    newBottom = bottom;
+                    newTop = new Vector2Int(_top.x - other._width, _top.y);
+                    newBottom = _bottom;
                     break;
                     // newPiece.CalculateSideAverage();
             }
 
             ImageClass.Translation(img, imgCopy, other, translationX, translationY);
-            return new PuzzlePiece(newTop, newBottom, leftDistance, rightDistance, topDistance, botDistance);
+            return new PuzzlePiece(newTop, newBottom, _leftDistance, _rightDistance, _topDistance, _botDistance);
         }
 
         public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
@@ -210,7 +213,7 @@ namespace CG_OpenCV
             return -angle;
         }
 
-        public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side) 
+        public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side)
         {
             // right -- left
             // top -- bottom
@@ -223,64 +226,67 @@ namespace CG_OpenCV
             switch (side)
             {
                 case Side.Top:
-                    if (a.width != b.width) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.width; i++)
+                    if (a._width != b._width) return float.PositiveInfinity;
+                    for (int i = 0; i < a._width; i++)
                     {
-                        int ra = (readA + 3 * (i) + widthStepA * 0)[2];
-                        int ga = (readA + 3 * (i) + widthStepA * 0)[1];
-                        int ba = (readA + 3 * (i) + widthStepA * 0)[0];
+                        int ra = (readA + 3 * (i))[2];
+                        int ga = (readA + 3 * (i))[1];
+                        int ba = (readA + 3 * (i))[0];
 
-                        int rb = (readB + 3 * (i) + widthStepB * b.height)[2];
-                        int gb = (readB + 3 * (i) + widthStepB * b.height)[1];
-                        int bb = (readB + 3 * (i) + widthStepB * b.height)[0];
+                        int rb = (readB + 3 * (i) + widthStepB * (b._height - 1))[2];
+                        int gb = (readB + 3 * (i) + widthStepB * (b._height - 1))[1];
+                        int bb = (readB + 3 * (i) + widthStepB * (b._height - 1))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
                     }
                     break;
+
                 case Side.Right:
-                    if (a.height != b.height) return float.PositiveInfinity;
-                    for (int i = 0; i < a.height; i++)
+                    if (a._height != b._height) return float.PositiveInfinity;
+                    for (int i = 0; i < a._height; i++)
                     {
-                        int ra = (readA + 3 * a.width + widthStepA * (i))[2];
-                        int ga = (readA + 3 * a.width + widthStepA * (i))[1];
-                        int ba = (readA + 3 * a.width + widthStepA * (i))[0];
+                        int ra = (readA + 3 * (a._width - 1) + widthStepA * (i))[2];
+                        int ga = (readA + 3 * (a._width - 1) + widthStepA * (i))[1];
+                        int ba = (readA + 3 * (a._width - 1) + widthStepA * (i))[0];
 
-                        int rb = (readB + 3 * 0 + widthStepB * (i))[2];
-                        int gb = (readB + 3 * 0 + widthStepB * (i))[1];
-                        int bb = (readB + 3 * 0 + widthStepB * (i))[0];
+                        int rb = (readB + widthStepB * (i))[2];
+                        int gb = (readB + widthStepB * (i))[1];
+                        int bb = (readB + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
                     }
                     break;
+
                 case Side.Bottom:
-                    if (a.width != b.width) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.width; i++)
+                    if (a._width != b._width) return float.PositiveInfinity;
+                    for (int i = 0; i < a._width; i++)
                     {
-                        int ra = (readA + 3 * (i) + widthStepA * a.height)[2];
-                        int ga = (readA + 3 * (i) + widthStepA * a.height)[1];
-                        int ba = (readA + 3 * (i) + widthStepA * a.height)[0];
+                        int ra = (readA + 3 * (i) + widthStepA * (a._height - 1))[2];
+                        int ga = (readA + 3 * (i) + widthStepA * (a._height - 1))[1];
+                        int ba = (readA + 3 * (i) + widthStepA * (a._height - 1))[0];
 
-                        int rb = (readB + 3 * (i) + widthStepB * 0)[2];
-                        int gb = (readB + 3 * (i) + widthStepB * 0)[1];
-                        int bb = (readB + 3 * (i) + widthStepB * 0)[0];
+                        int rb = (readB + 3 * (i) + widthStepB)[2];
+                        int gb = (readB + 3 * (i) + widthStepB)[1];
+                        int bb = (readB + 3 * (i) + widthStepB)[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
                     }
                     break;
-                case Side.Left:
-                    if (a.height != b.height) return float.PositiveInfinity;
-                    for (int i = 0; i <= a.height; i++)
-                    {
-                        int ra = (readA + 3 * 0 + widthStepA * (i))[2];
-                        int ga = (readA + 3 * 0 + widthStepA * (i))[1];
-                        int ba = (readA + 3 * 0 + widthStepA * (i))[0];
 
-                        int rb = (readB + 3 * b.width + widthStepB * (i))[2];
-                        int gb = (readB + 3 * b.width + widthStepB * (i))[1];
-                        int bb = (readB + 3 * b.width + widthStepB * (i))[0];
+                case Side.Left:
+                    if (a._height != b._height) return float.PositiveInfinity;
+                    for (int i = 0; i < a._height; i++)
+                    {
+                        int ra = (readA + widthStepA * (i))[2];
+                        int ga = (readA + widthStepA * (i))[1];
+                        int ba = (readA + widthStepA * (i))[0];
+
+                        int rb = (readB + 3 * (b._width - 1) + widthStepB * (i))[2];
+                        int gb = (readB + 3 * (b._width - 1) + widthStepB * (i))[1];
+                        int bb = (readB + 3 * (b._width - 1) + widthStepB * (i))[0];
 
                         float sum = (ba - bb) * (ba - bb) + (ga - gb) * (ga - gb) + (ra - rb) * (ra - rb);
                         distance += Math.Sqrt(sum);
@@ -322,28 +328,28 @@ namespace CG_OpenCV
             switch (side)
             {
                 case Side.Top:
-                    dist = Math.Abs(other.botDistance - topDistance);
+                    dist = Math.Abs(other._botDistance - _topDistance);
                     break;
 
                 case Side.Right:
-                    dist = Math.Abs(other.leftDistance - rightDistance);
+                    dist = Math.Abs(other._leftDistance - _rightDistance);
                     break;
 
                 case Side.Bottom:
-                    dist = Math.Abs(other.topDistance - botDistance);
+                    dist = Math.Abs(other._topDistance - _botDistance);
                     break;
 
                 case Side.Left:
-                    dist = Math.Abs(other.rightDistance - leftDistance);
+                    dist = Math.Abs(other._rightDistance - _leftDistance);
                     break;
             }
 
             return dist;
         }
 
-        public bool MatchSide(PuzzlePiece other) 
+        public bool MatchSide(PuzzlePiece other)
         {
-            return other.width == width || other.height == height;
+            return other._width == _width || other._height == _height;
         }
     }
 
