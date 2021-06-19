@@ -58,6 +58,8 @@
             this.evalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.ImageViewer = new System.Windows.Forms.PictureBox();
+            this.rotateIndividualPiecesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.drawBoundsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ImageViewer)).BeginInit();
@@ -143,7 +145,9 @@
             this.autoZoomToolStripMenuItem,
             this.binarizationToolStripMenuItem,
             this.histogramToolStripMenuItem,
-            this.PuzzleSolverToolStripMenuItem});
+            this.PuzzleSolverToolStripMenuItem,
+            this.rotateIndividualPiecesToolStripMenuItem,
+            this.drawBoundsToolStripMenuItem});
             this.imageToolStripMenuItem.Name = "imageToolStripMenuItem";
             this.imageToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.imageToolStripMenuItem.Text = "Image";
@@ -154,20 +158,20 @@
             this.negativeToolStripMenuItem,
             this.grayToolStripMenuItem});
             this.colorToolStripMenuItem.Name = "colorToolStripMenuItem";
-            this.colorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.colorToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.colorToolStripMenuItem.Text = "Color";
             // 
             // negativeToolStripMenuItem
             // 
             this.negativeToolStripMenuItem.Name = "negativeToolStripMenuItem";
-            this.negativeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.negativeToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             this.negativeToolStripMenuItem.Text = "Negative";
             this.negativeToolStripMenuItem.Click += new System.EventHandler(this.negativeToolStripMenuItem_Click);
             // 
             // grayToolStripMenuItem
             // 
             this.grayToolStripMenuItem.Name = "grayToolStripMenuItem";
-            this.grayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.grayToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             this.grayToolStripMenuItem.Text = "Gray";
             this.grayToolStripMenuItem.Click += new System.EventHandler(this.grayToolStripMenuItem_Click);
             // 
@@ -178,7 +182,7 @@
             this.rotationToolStripMenuItem,
             this.zoomToolStripMenuItem});
             this.transformsToolStripMenuItem.Name = "transformsToolStripMenuItem";
-            this.transformsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.transformsToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.transformsToolStripMenuItem.Text = "Transforms";
             // 
             // translationToolStripMenuItem
@@ -206,7 +210,7 @@
             this.filtersToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.brightnessContrastToolStripMenuItem});
             this.filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            this.filtersToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.filtersToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.filtersToolStripMenuItem.Text = "Filters";
             // 
             // brightnessContrastToolStripMenuItem
@@ -220,7 +224,7 @@
             // 
             this.autoZoomToolStripMenuItem.CheckOnClick = true;
             this.autoZoomToolStripMenuItem.Name = "autoZoomToolStripMenuItem";
-            this.autoZoomToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoZoomToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.autoZoomToolStripMenuItem.Text = "Auto Zoom";
             this.autoZoomToolStripMenuItem.Click += new System.EventHandler(this.autoZoomToolStripMenuItem_Click);
             // 
@@ -230,7 +234,7 @@
             this.blackWhiteTresholdToolStripMenuItem,
             this.blackWhiteOtsuToolStripMenuItem});
             this.binarizationToolStripMenuItem.Name = "binarizationToolStripMenuItem";
-            this.binarizationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.binarizationToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.binarizationToolStripMenuItem.Text = "Binarilization";
             this.binarizationToolStripMenuItem.Click += new System.EventHandler(this.binarizationToolStripMenuItem_Click);
             // 
@@ -251,14 +255,14 @@
             // histogramToolStripMenuItem
             // 
             this.histogramToolStripMenuItem.Name = "histogramToolStripMenuItem";
-            this.histogramToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.histogramToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.histogramToolStripMenuItem.Text = "Histogram";
             this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
             // 
             // PuzzleSolverToolStripMenuItem
             // 
             this.PuzzleSolverToolStripMenuItem.Name = "PuzzleSolverToolStripMenuItem";
-            this.PuzzleSolverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.PuzzleSolverToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.PuzzleSolverToolStripMenuItem.Text = "PuzzleSolver";
             this.PuzzleSolverToolStripMenuItem.Click += new System.EventHandler(this.PuzzleSolverToolStripMenuItem_Click);
             // 
@@ -295,6 +299,20 @@
             this.ImageViewer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.ImageViewer.TabIndex = 6;
             this.ImageViewer.TabStop = false;
+            // 
+            // rotateIndividualPiecesToolStripMenuItem
+            // 
+            this.rotateIndividualPiecesToolStripMenuItem.Name = "rotateIndividualPiecesToolStripMenuItem";
+            this.rotateIndividualPiecesToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.rotateIndividualPiecesToolStripMenuItem.Text = "Rotate Individual Pieces";
+            this.rotateIndividualPiecesToolStripMenuItem.Click += new System.EventHandler(this.rotateIndividualPiecesToolStripMenuItem_Click);
+            // 
+            // drawBoundsToolStripMenuItem
+            // 
+            this.drawBoundsToolStripMenuItem.Name = "drawBoundsToolStripMenuItem";
+            this.drawBoundsToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.drawBoundsToolStripMenuItem.Text = "Draw Bounds";
+            this.drawBoundsToolStripMenuItem.Click += new System.EventHandler(this.drawBoundsToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -348,6 +366,8 @@
         private System.Windows.Forms.ToolStripMenuItem PuzzleSolverToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blackWhiteTresholdToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blackWhiteOtsuToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rotateIndividualPiecesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem drawBoundsToolStripMenuItem;
     }
 }
 

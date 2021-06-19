@@ -16,7 +16,7 @@
 - [Classes e Estruturas](#classes-e-estruturas)
   - [PuzzlePiece](#puzzlepiece)
   - [Vector2Int](#vector2int)
-- [Métodos](#métodos)
+- [Métodos Extra](#métodos-extra)
 - [Outras Soluções](#outras-soluções)
 - [Problemas](#problemas)
 
@@ -30,15 +30,15 @@ Para esta solução encontramos peças independentes dentro de uma imagem, criam
 
 #### Descrição
 
-* Começamos por preparar os apontadores necessários para ler a imagem e criamos um vetor de `PuzzlePiece`, classe que contém toda a informação necessária para uma peça e as funções que comparam e juntam estas.
+1. Começamos por preparar os apontadores necessários para ler a imagem e criamos um vetor de `PuzzlePiece`, classe que contém toda a informação necessária para uma peça e as funções que comparam e juntam estas.
 
-* Este vetor é preenchido pela função `DetectIndependentObjects` da `ImageClass` que usa o algorítmo de objetos ligados para contar e separar cada peça pelos seus limites, criando posições (x,y) para topo esquerdo e canto direito de cada peça.
+2. Este vetor é preenchido pela função `DetectIndependentObjects` da `ImageClass` que usa o algorítmo de objetos ligados para contar e separar cada peça pelos seus limites, criando posições (x,y) para topo esquerdo e canto direito de cada peça.
 
-* O vetor das imagens é passado para outra função `FindRotation` que calcula e tenta rodar cada peça em volta do centro da própria. Esta rotação é escrita para a imagem original, ficando assim com uma imagem de peças direitas e um vetor de peças de puzzle com os limites definidos.
+3. O vetor das imagens é passado para outra função `FindRotation` que calcula e tenta rodar cada peça em volta do centro da própria. Esta rotação é escrita para a imagem original, ficando assim com uma imagem de peças direitas e um vetor de peças de puzzle com os limites definidos.
 
-* Com esta informação, inicializamos cada `PuzzlePiece` chamando `CreateImage(Image<Bgr, Byte> original)` para cada peça, esta função cria e guarda uma imagem que contem únicamente a peça correspondente aos limites criados anteriormente.
+4. Com esta informação, inicializamos cada `PuzzlePiece` chamando `CreateImage(Image<Bgr, Byte> original)` para cada peça, esta função cria e guarda uma imagem que contem únicamente a peça correspondente aos limites criados anteriormente.
 
-* Com todas as peças base inicializadas, corremos o algoritmo da função `PuzzlePiece Join(List<PuzzlePiece> pieces)` que retorna uma única peça final de posição 0,0 e com comprimento e largura do nosso puzzle resolvido, sendo apenas necessário usar a propriedade `Img` de `PuzzlePiece` para retornar a imagem recortada final.
+5. Com todas as peças base inicializadas, corremos o algoritmo da função `PuzzlePiece Join(List<PuzzlePiece> pieces)` que retorna uma única peça final de posição 0,0 e com comprimento e largura do nosso puzzle resolvido, sendo apenas necessário usar a propriedade `Img` de `PuzzlePiece` para retornar a imagem recortada final.
 
 #### Função Join
 
@@ -92,7 +92,7 @@ public enum Side
 }
 ```
 
-Por fim, por cada lado, percorrer todas as peças, ignorando a atual, calculando a distância entre as duas pelo lado, feito através da função `Compare(PuzzlePiece a, PuzzlePiece b, Side side)` da classe `PuzzlePiece`. Esta função retorna a soma de todas as distâncias `RGB` entre lados adjacentes de a e b, se a e b tiverem o lado a comparar de tamanha diferente, esta função retorna imediatamente `PositiveInfinity`.
+No segundo _loop_, por cada lado, percorrer todas as peças, ignorando a atual, calculando a distância entre as duas pelo lado, feito através da função `Compare(PuzzlePiece a, PuzzlePiece b, Side side)` da classe `PuzzlePiece`. Esta função retorna a soma de todas as distâncias `RGB` entre lados adjacentes de `a` e `b`, se `a` e `b` tiverem o lado a comparar de tamanho diferente, esta função retorna imediatamente `PositiveInfinity`, ignorando a possíbilidade de conceção.
 
 Quando saímos dos 2 _nested loops_ anteriores, temos acesso a 2 peças e ao lado pelas quais estas devem ser combinadas, sendo apenas uma questão de as combinar usando o método `Combine` de `PuzzlePiece`. Este método por sua vez calcula a nova largura e comprimento das imagens e usa o método `Image<Bgr, byte>.CopyTo()` para criar a nova peça adequadamente.
 
@@ -146,7 +146,33 @@ public Image<Bgr, byte> Img { get; private set; }
 
 Métodos
 
+`CreateImage` Cria a imagem da peça através da imagem completa original
+```cs
+public void CreateImage(Image<Bgr, byte> original)
+{
+    Img = new Image<Bgr, byte>(Width, Height);
+    Rectangle cropArea = new Rectangle(Top.x, Top.y, Width, Height);
+    Img.Bitmap = original.Bitmap.Clone(cropArea, original.Bitmap.PixelFormat);
+}
+```
+`Combine` combina duas peças através do lado dado. Internamente usa o método `CopyTo()`
 
+```cs
+public PuzzlePiece Combine(PuzzlePiece other, Side side);
+```
+
+Devolve o ângulo de uma peça usando o topo e fundo da imagem
+```cs
+public static double ImageAngle(Vector2Int rightBottom, Vector2Int bottom)
+{
+    Vector2Int diagonal = rightBottom - bottom;
+
+    double r = Math.Atan2(diagonal.y, diagonal.x);
+    double angle = r * 180.0 / Math.PI;
+
+    return -Math.Round(angle);
+}
+```
 
 #### Vector2Int
 
@@ -180,9 +206,9 @@ internal struct Vector2Int
 
 Para simplicidade, adicionámos uma propriedade estática que retorna um novo vector a zeros, um método de distância e dois _overrides_ para os operadores `+` e `-` 
 
-### Métodos
+### Métodos Extra
 
-
+Adicionámos vários métodos a `ImageClass` que nos ajudam a visualizar os passos do algoritmo de resolução de puzzles. 
 
 ### Outras Soluções
 
@@ -190,8 +216,9 @@ Para simplicidade, adicionámos uma propriedade estática que retorna um novo ve
 
 ### Problemas
 
-
+1. De momento não é possível resolver imagens com peças rodadas, o programa consegue identificar e rodar peças mas estas ficam com desvios que afetam os passos de conexão do algoritmo. O utilizador pode usar o item de menu `Rotate Individual Pieces` para ver o resultado desta operação.
 
 [André Vitorino]: https://github.com/Freeze88-2
 [Rodrigo Pinheiro]: https://github.com/RodrigoPrinheiro
 [bounds]: images/bounds.png
+[functions]: images/functionsCG.png

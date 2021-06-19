@@ -373,5 +373,40 @@ namespace CG_OpenCV
             ImageViewer.Size = new System.Drawing.Size(ImageViewer.Size.Width + nSteps, ImageViewer.Size.Height + nSteps);
             ImageViewer.Dock = DockStyle.None;
         }
+
+        private void rotateIndividualPiecesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.RotateIndividualPieces(img, imgUndo);
+            ImageClass.DrawBounds(img, img);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
+
+        private void drawBoundsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (img == null) // verify if the image is already opened
+            {
+                return;
+            }
+            Cursor = Cursors.WaitCursor; // clock cursor
+
+            //copy Undo Image
+            imgUndo = img.Copy();
+
+            ImageClass.DrawBounds(img, imgUndo);
+            ImageViewer.Refresh(); // refresh image on the screen
+
+            Cursor = Cursors.Default;
+        }
     }
 }

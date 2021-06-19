@@ -1661,6 +1661,26 @@ namespace CG_OpenCV
             }
         }
 
+        public static void DrawBounds(Image<Bgr,byte> img, Image<Bgr, byte> imgCopy) 
+        {
+            MIplImage m = img.MIplImage;
+            MIplImage mUndo = imgCopy.MIplImage;
+
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
+
+                int width = imgCopy.Width;
+                int height = imgCopy.Height;
+                int nChan = mUndo.nChannels;
+                int widthStep = mUndo.widthStep;
+
+                PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
+                DrawBoundingBoxes(dataPtrWrite, nChan, widthStep, puzzlePieces);
+            }
+        }
+
         /// <summary>
         /// Find the bottom/left most point and the bottom/right most point
         /// then finds the rotation between the two and rotates the image
@@ -1832,7 +1852,7 @@ namespace CG_OpenCV
                     }
 
                     // Updates that piece with the correct bounding box and angle
-                    images[i] = new PuzzlePiece(new Vector2Int(newBoundTop.x + 3, newBoundTop.y - 1), new Vector2Int(newBoundBottom.x -2, newBoundBottom.y + 6), delta);
+                    images[i] = new PuzzlePiece(new Vector2Int(newBoundTop.x + 3, newBoundTop.y - 1), new Vector2Int(newBoundBottom.x - 2, newBoundBottom.y + 6), delta);
                 }
             }
             bool IsPixelBackGroundColor(int x, int y)
@@ -1841,6 +1861,25 @@ namespace CG_OpenCV
                     (dataPtrWrite + nChan * x + widthStep * y)[0] == dataPtrRead[0] &&
                     (dataPtrWrite + nChan * x + widthStep * y)[1] == dataPtrRead[1] &&
                     (dataPtrWrite + nChan * x + widthStep * y)[2] == dataPtrRead[2];
+            }
+        }
+
+        public static void RotateIndividualPieces(Image<Bgr, byte> img, Image<Bgr, byte> imgCopy)
+        {
+            MIplImage m = img.MIplImage;
+            MIplImage mUndo = imgCopy.MIplImage;
+            unsafe
+            {
+                byte* dataPtrRead = (byte*)mUndo.imageData.ToPointer();
+                byte* dataPtrWrite = (byte*)m.imageData.ToPointer(); // It can be deleted after
+
+                int width = imgCopy.Width;
+                int height = imgCopy.Height;
+                int nChan = mUndo.nChannels;
+                int widthStep = mUndo.widthStep;
+
+                PuzzlePiece[] puzzlePieces = DetectIndependentObjects(dataPtrWrite, dataPtrRead, nChan, widthStep, width, height);
+                FindRotation(dataPtrWrite, dataPtrRead, nChan, widthStep, puzzlePieces);
             }
         }
 
