@@ -111,7 +111,7 @@ namespace CG_OpenCV
             double r = Math.Atan2(diagonal.y, diagonal.x);
             double angle = r * 180.0 / Math.PI;
 
-            return -angle;
+            return -Math.Round(angle);
         }
 
         public static unsafe double Compare(PuzzlePiece a, PuzzlePiece b, Side side)
