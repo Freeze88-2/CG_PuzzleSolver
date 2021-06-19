@@ -13,7 +13,9 @@
 - [Algoritmo](#algoritmo)
   - [Descrição](#descrição)
   - [Função Join](#função-join)
-- [Classes](#classes)
+- [Classes e Estruturas](#classes-e-estruturas)
+  - [PuzzlePiece](#puzzlepiece)
+  - [Vector2Int](#vector2int)
 - [Métodos](#métodos)
 - [Outras Soluções](#outras-soluções)
 - [Problemas](#problemas)
@@ -55,7 +57,7 @@ public static PuzzlePiece Join(List<PuzzlePiece> pieces)
         {
             for (int j = 0; j < pieces.Count; j++)
             {
-                // Protect from comparing with the same puzzlpiece
+                // Protect from comparing with the same puzzle piece
                 if (i == j) continue
                 double dist = PuzzlePiece.Compare(pieces[i]pieces[j], (Side)side)
                 if (dist < min)
@@ -94,13 +96,102 @@ Por fim, por cada lado, percorrer todas as peças, ignorando a atual, calculando
 
 Quando saímos dos 2 _nested loops_ anteriores, temos acesso a 2 peças e ao lado pelas quais estas devem ser combinadas, sendo apenas uma questão de as combinar usando o método `Combine` de `PuzzlePiece`. Este método por sua vez calcula a nova largura e comprimento das imagens e usa o método `Image<Bgr, byte>.CopyTo()` para criar a nova peça adequadamente.
 
-### Classes
+Se a peça atual da procura for combinada com outra, reiniciamos o loop `i = 0;` de modo a verificar se as alguma peça que anteriormente não tenha tido par já tem agora que houve uma combinação.
+
+### Classes e Estruturas
+
+#### PuzzlePiece
+
+Para a nossa solução final foi apenas criada a classe `PuzzlePiece` que contém várias funcionalidades e propriedades usadas no nosso algorítmo. O objétivo príncipal desta classe é ter a informação necessária por peça para ler os pixeis correspondentes da imagem original de onde a peça foi criada e também realizar operações sobre pares de peças.
+
+`PuzzlePiece` contém um único construtor, este recebe o canto superior esquerdo e o canto inferior direito da peça em questão na forma de `Vector2Int`. Também é possível passar o ângulo da peça se este já tiver sido calculado.
+
+![boundsImage][bounds]
+
+```cs
+public PuzzlePiece(Vector2Int top, Vector2Int bottom, double angle = 0)
+{
+    _top = top;
+    _bottom = bottom
+    _height = bottom.y - top.y + 1;
+    _width = bottom.x - top.x + 1
+    Angle = angle;
+}
+```
+Propriedades
+
+Limites da imagem, Topo e fundo
+```cs
+public Vector2Int Top => _top;
+public Vector2Int Bottom => _bottom;
+```
+
+Altura e largura calculada no construtor
+```cs
+public int Height => _height;
+public int Width => _width;
+```
+
+Ângulo da imagem
+```cs
+public double Angle { get; }
+```
+
+Imagem da peça criada no método `void CreateImage(Image<Bgr, byte> original)`
+ou por combinação de peças
+
+```cs
+public Image<Bgr, byte> Img { get; private set; }
+```
+
+Métodos
+
+
+
+#### Vector2Int
+
+Por preferência, decidimos estruturar as coordenadas das imagens nesta estrutura simples em vez de optar por `Tuples` ou pela estrutura `Point`.
+
+```cs
+internal struct Vector2Int
+{
+    public static Vector2Int Zero => new Vector2Int(0, 0);
+    
+    public int x;
+    public int y;
+    
+    public Vector2Int(int x = default, int y = default)
+    {
+        this.x = x;
+        this.y = y;
+    }
+    
+    // Distance between 2 points
+    public static double Distance(Vector2Int a, Vector2Int b)
+    {
+        return Math.Sqrt(Math.Pow(a.x - b.x, 2) + Math.Pow(a.y - b.y, 2));
+    }
+
+    public static Vector2Int operator +(Vector2Int a, Vector2Int b) => newVector2Int(a.x + b.x, a.y + b.y);
+    
+    public static Vector2Int operator -(Vector2Int a, Vector2Int b) => newVector2Int(a.x - b.x, a.y - b.y);
+}
+```
+
+Para simplicidade, adicionámos uma propriedade estática que retorna um novo vector a zeros, um método de distância e dois _overrides_ para os operadores `+` e `-` 
 
 ### Métodos
 
+
+
 ### Outras Soluções
+
+
 
 ### Problemas
 
+
+
 [André Vitorino]: https://github.com/Freeze88-2
 [Rodrigo Pinheiro]: https://github.com/RodrigoPrinheiro
+[bounds]: images/bounds.png
